@@ -1,10 +1,10 @@
 import React from "react";
-import Layout from "../../../src/components/Layout";
-import Card from "../../../src/components/ui/Card";
+import Layout from "../../components/Layout";
+import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
-import Select from "../../../src/components/ui/Select";
-import TextArea from "../../../src/components/ui/TextArea";
+import Select from "../../components/ui/Select";
+import TextArea from "../../components/ui/TextArea";
 
 const categories = [
   { label: "Детские игрушки", value: "toys" },
