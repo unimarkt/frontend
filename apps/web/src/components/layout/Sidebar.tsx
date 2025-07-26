@@ -2,22 +2,23 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import Button from "../ui/Button";
 import Separator from "../ui/Separator";
-import { Home, ShoppingBasket, Layers, Trash2 } from "lucide-react";
+import { HomeIcon, LayersIcon, LayoutIcon } from "../../assets/icons/DashboardIcons";
+import { LogoIcon } from "../../assets/icons";
 
 const menu = [
-  { id: "home", label: "Домой", icon: <Home />, to: "/" },
-  { id: "products", label: "Продукты", icon: <ShoppingBasket />, to: "/products" },
+  { id: "home", label: "Домой", icon: <HomeIcon className="w-5 h-5" />, to: "/" },
+  { id: "products", label: "Продукты", icon: <LayoutIcon className="w-5 h-5" />, to: "/products" },
 ];
 const workspace = [
-  { id: "constructor", label: "Конструктор", icon: <Layers />, to: "/constructor" },
-  { id: "styles", label: "Стили", icon: <Layers />, to: "/styles" },
-  { id: "trash", label: "Корзина", icon: <Trash2 />, to: "/trash" },
+  { id: "constructor", label: "Конструктор", icon: <LayersIcon className="w-5 h-5" />, to: "/constructor" },
+  { id: "styles", label: "Стили", icon: <LayersIcon className="w-5 h-5" />, to: "/styles" },
+  { id: "trash", label: "Корзина", icon: <LayoutIcon className="w-5 h-5" />, to: "/trash" },
 ];
 
 const Sidebar: React.FC = React.memo(() => (
   <aside className="w-[260px] bg-white border-r border-gray-200 flex flex-col min-h-screen">
     <div className="flex items-center gap-2 px-6 py-4">
-      <img src="/logo.svg" alt="UniMart" className="w-8 h-8" />
+      <LogoIcon width={32} height={32} />
       <span className="font-bold text-xl text-primary-500">UniMart</span>
     </div>
     <nav className="flex-1 flex flex-col gap-6 px-4">

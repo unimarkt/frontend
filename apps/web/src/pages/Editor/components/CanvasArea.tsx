@@ -1,253 +1,276 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useFabricCanvas } from '../hooks/useFabricCanvas';
+import React, { forwardRef, useCallback, useEffect, useState } from 'react';
+import type { Layer } from '../types/canvas.types';
 
 interface CanvasAreaProps {
-  productId: string;
-  onLayerSelect: (layerId: string | null) => void;
-  onLayerUpdate: (layerId: string, updates: any) => void;
+  layers: Layer[];
+  selectedLayerId: string | null;
+  onSelectLayer: (layerId: string | null) => void;
+  onUpdateLayer: (layerId: string, updates: Partial<Layer>) => void;
+  showGrid: boolean;
+  zoom: number;
 }
 
-const CanvasArea: React.FC<CanvasAreaProps> = ({ 
-  productId, 
-  onLayerSelect, 
-  onLayerUpdate 
-}) => {
-  const {
-    canvasRef,
-    canvas,
-    zoom,
-    gridVisible,
-    canUndo,
-    canRedo,
-    addText,
-    addImage,
-    addShape,
-    deleteSelected,
-    setZoomLevel,
-    toggleGrid,
-    exportToPNG,
-    undo,
-    redo,
-  } = useFabricCanvas(productId);
+const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(({
+  layers,
+  selectedLayerId,
+  onSelectLayer,
+  onUpdateLayer,
+  showGrid,
+  zoom
+}, ref) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [selectedElements, setSelectedElements] = useState<string[]>([]);
 
-  const hasSelection = canvas?.getActiveObject() !== null;
+  // Обработка клика по элементу
+  const handleElementClick = useCallback((e: React.MouseEvent, layerId: string) => {
+    e.stopPropagation();
+    onSelectLayer(layerId);
+  }, [onSelectLayer]);
 
-  // Drag & Drop для изображений
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    
-    const files = Array.from(e.dataTransfer.files);
-    const imageFile = files.find(file => file.type.startsWith('image/'));
-    
-    if (imageFile) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageUrl = event.target?.result as string;
-        addImage(imageUrl);
-      };
-      reader.readAsDataURL(imageFile);
+  // Обработка клика по canvas
+  const handleCanvasClick = useCallback(() => {
+    onSelectLayer(null);
+  }, [onSelectLayer]);
+
+  // Начало перетаскивания
+  const handleMouseDown = useCallback((e: React.MouseEvent, layerId: string) => {
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    onSelectLayer(layerId);
+  }, [onSelectLayer]);
+
+  // Перетаскивание
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging || !selectedLayerId) return;
+
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+
+    const selectedLayer = layers.find(l => l.id === selectedLayerId);
+    if (selectedLayer) {
+      onUpdateLayer(selectedLayerId, {
+        x: selectedLayer.x + deltaX,
+        y: selectedLayer.y + deltaY
+      });
     }
-  }, [addImage]);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
+    setDragStart({ x: e.clientX, y: e.clientY });
+  }, [isDragging, selectedLayerId, dragStart, layers, onUpdateLayer]);
+
+  // Конец перетаскивания
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
   }, []);
 
-  // Клавиатурные сокращения
+  // Обработка клавиатуры
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
+      if (!selectedLayerId) return;
 
-      const isCtrl = e.ctrlKey || e.metaKey;
-      
+      const selectedLayer = layers.find(l => l.id === selectedLayerId);
+      if (!selectedLayer) return;
+
       switch (e.key) {
         case 'Delete':
         case 'Backspace':
+          // Удаление слоя будет обработано в родительском компоненте
+          break;
+        case 'Escape':
+          onSelectLayer(null);
+          break;
+        case 'ArrowLeft':
           e.preventDefault();
-          deleteSelected();
+          onUpdateLayer(selectedLayerId, { x: selectedLayer.x - 1 });
           break;
-        case 'z':
-          if (isCtrl) {
-            e.preventDefault();
-            if (e.shiftKey) {
-              redo();
-            } else {
-              undo();
-            }
-          }
+        case 'ArrowRight':
+          e.preventDefault();
+          onUpdateLayer(selectedLayerId, { x: selectedLayer.x + 1 });
           break;
-        case 'y':
-          if (isCtrl) {
-            e.preventDefault();
-            redo();
-          }
+        case 'ArrowUp':
+          e.preventDefault();
+          onUpdateLayer(selectedLayerId, { y: selectedLayer.y - 1 });
           break;
-        case 's':
-          if (isCtrl) {
-            e.preventDefault();
-            // TODO: Сохранение
-            console.log('Save');
-          }
-          break;
-        case 'e':
-          if (isCtrl) {
-            e.preventDefault();
-            exportToPNG();
-          }
-          break;
-        case 't':
-          if (isCtrl) {
-            e.preventDefault();
-            addText();
-          }
-          break;
-        case 'i':
-          if (isCtrl) {
-            e.preventDefault();
-            // TODO: Добавить изображение через диалог
-            console.log('Add image');
-          }
-          break;
-        case '=':
-        case '+':
-          if (isCtrl) {
-            e.preventDefault();
-            setZoomLevel(Math.min(zoom + 0.1, 3));
-          }
-          break;
-        case '-':
-          if (isCtrl) {
-            e.preventDefault();
-            setZoomLevel(Math.max(zoom - 0.1, 0.1));
-          }
-          break;
-        case '0':
-          if (isCtrl) {
-            e.preventDefault();
-            setZoomLevel(1);
-          }
-          break;
-        case 'g':
-          if (isCtrl) {
-            e.preventDefault();
-            toggleGrid();
-          }
+        case 'ArrowDown':
+          e.preventDefault();
+          onUpdateLayer(selectedLayerId, { y: selectedLayer.y + 1 });
           break;
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [deleteSelected, undo, redo, exportToPNG, addText, zoom, setZoomLevel, toggleGrid]);
+  }, [selectedLayerId, layers, onSelectLayer, onUpdateLayer]);
 
-  // Обработчики для Toolbar
-  const handleAddText = useCallback(() => {
-    addText('Новый текст');
-  }, [addText]);
+  // Генерация точечной сетки
+  const generateGridDots = () => {
+    if (!showGrid) return null;
 
-  const handleAddImage = useCallback(() => {
-    // Создаем скрытый input для выбора файла
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const imageUrl = event.target?.result as string;
-          addImage(imageUrl);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  }, [addImage]);
+    const dots = [];
+    const gridSize = 23; // Размер сетки как в Figma
+    const canvasWidth = 900;
+    const canvasHeight = 1200;
 
-  const handleAddShape = useCallback((shapeType: 'rect' | 'circle' | 'triangle') => {
-    addShape(shapeType);
-  }, [addShape]);
-
-  const handleZoomIn = useCallback(() => {
-    setZoomLevel(Math.min(zoom + 0.1, 3));
-  }, [zoom, setZoomLevel]);
-
-  const handleZoomOut = useCallback(() => {
-    setZoomLevel(Math.max(zoom - 0.1, 0.1));
-  }, [zoom, setZoomLevel]);
-
-  const handleRotateLeft = useCallback(() => {
-    if (canvas) {
-      const activeObject = canvas.getActiveObject();
-      if (activeObject) {
-        activeObject.rotate((activeObject.angle || 0) - 15);
-        canvas.renderAll();
-      }
-    }
-  }, [canvas]);
-
-  const handleRotateRight = useCallback(() => {
-    if (canvas) {
-      const activeObject = canvas.getActiveObject();
-      if (activeObject) {
-        activeObject.rotate((activeObject.angle || 0) + 15);
-        canvas.renderAll();
-      }
-    }
-  }, [canvas]);
-
-  return (
-    <div className="flex-1 flex flex-col bg-gray-100">
-      {/* Toolbar */}
-      <div className="bg-white border-b border-gray-200">
-        {/* Здесь будет Toolbar компонент */}
-      </div>
-
-      {/* Canvas область */}
-      <div 
-        className="flex-1 flex items-center justify-center overflow-hidden"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
-        <div className="relative">
-          {/* Сетка */}
-          {gridVisible && (
-            <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
-                `,
-                backgroundSize: '20px 20px'
-              }}
-            />
-          )}
-          
-          {/* Canvas */}
-          <canvas
-            ref={canvasRef}
-            className="border border-gray-300 shadow-lg bg-white"
+    for (let x = 0; x <= canvasWidth; x += gridSize) {
+      for (let y = 0; y <= canvasHeight; y += gridSize) {
+        dots.push(
+          <div
+            key={`${x}-${y}`}
+            className="absolute w-[3px] h-[3px] bg-[#DFE1E7] rounded-full"
             style={{
-              transform: `scale(${zoom})`,
-              transformOrigin: 'center center'
+              left: x - 1.5,
+              top: y - 1.5
             }}
           />
-        </div>
-      </div>
+        );
+      }
+    }
 
-      {/* Индикаторы */}
-      <div className="bg-white border-t border-gray-200 px-4 py-2 text-sm text-gray-500">
-        <div className="flex justify-between items-center">
-          <span>Масштаб: {Math.round(zoom * 100)}%</span>
-          <span>Сетка: {gridVisible ? 'Вкл' : 'Выкл'}</span>
-          <span>Выбрано: {hasSelection ? 'Да' : 'Нет'}</span>
-        </div>
+    return dots;
+  };
+
+  // Рендер элемента в зависимости от типа
+  const renderElement = (layer: Layer) => {
+    const isSelected = selectedLayerId === layer.id;
+    const baseStyle = {
+      position: 'absolute' as const,
+      left: layer.x,
+      top: layer.y,
+      width: layer.width,
+      height: layer.height,
+      transform: `rotate(${layer.rotation}deg)`,
+      opacity: layer.opacity,
+      cursor: isDragging ? 'grabbing' : 'grab',
+      zIndex: layer.zIndex
+    };
+
+    switch (layer.type) {
+      case 'text':
+        return (
+          <div
+            key={layer.id}
+            className={`${isSelected ? 'ring-2 ring-[#1264FF] ring-offset-1' : ''} 
+                       bg-transparent border border-transparent hover:border-[#DFE1E7] transition-colors`}
+            style={{
+              ...baseStyle,
+              fontFamily: layer.properties.fontFamily || 'Manrope',
+              fontSize: layer.properties.fontSize || 16,
+              fontWeight: layer.properties.fontWeight || 400,
+              color: layer.properties.color || '#000000',
+              textAlign: layer.properties.textAlign || 'left',
+              lineHeight: '1.2',
+              padding: '4px'
+            }}
+            onClick={(e) => handleElementClick(e, layer.id)}
+            onMouseDown={(e) => handleMouseDown(e, layer.id)}
+          >
+            {layer.properties.text || 'Текст'}
+          </div>
+        );
+
+      case 'image':
+        return (
+          <div
+            key={layer.id}
+            className={`${isSelected ? 'ring-2 ring-[#1264FF] ring-offset-1' : ''} 
+                       bg-gray-100 border border-gray-200 hover:border-[#DFE1E7] transition-colors`}
+            style={baseStyle}
+            onClick={(e) => handleElementClick(e, layer.id)}
+            onMouseDown={(e) => handleMouseDown(e, layer.id)}
+          >
+            {layer.properties.src ? (
+              <img
+                src={layer.properties.src}
+                alt={layer.properties.alt || 'Изображение'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+                  <path d="M21 15L16 10L5 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'shape':
+        const shapeStyle = {
+          ...baseStyle,
+          backgroundColor: layer.properties.fillColor || '#1264FF',
+          border: layer.properties.strokeWidth > 0 
+            ? `${layer.properties.strokeWidth}px solid ${layer.properties.strokeColor || 'transparent'}`
+            : 'none'
+        };
+
+        if (layer.properties.shapeType === 'circle') {
+          return (
+            <div
+              key={layer.id}
+              className={`${isSelected ? 'ring-2 ring-[#1264FF] ring-offset-1' : ''} 
+                         border border-gray-200 hover:border-[#DFE1E7] transition-colors`}
+              style={{
+                ...shapeStyle,
+                borderRadius: '50%'
+              }}
+              onClick={(e) => handleElementClick(e, layer.id)}
+              onMouseDown={(e) => handleMouseDown(e, layer.id)}
+            />
+          );
+        }
+
+        return (
+          <div
+            key={layer.id}
+            className={`${isSelected ? 'ring-2 ring-[#1264FF] ring-offset-1' : ''} 
+                       border border-gray-200 hover:border-[#DFE1E7] transition-colors`}
+            style={shapeStyle}
+            onClick={(e) => handleElementClick(e, layer.id)}
+            onMouseDown={(e) => handleMouseDown(e, layer.id)}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div
+      ref={ref}
+      className="relative bg-white border border-[#DFE1E7] shadow-sm overflow-hidden"
+      style={{
+        width: 900,
+        height: 1200,
+        transform: `scale(${zoom / 100})`,
+        transformOrigin: 'center center'
+      }}
+      onClick={handleCanvasClick}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      {/* Точечная сетка */}
+      {generateGridDots()}
+
+      {/* Элементы */}
+      {layers
+        .filter(layer => layer.visible)
+        .sort((a, b) => a.zIndex - b.zIndex)
+        .map(renderElement)
+      }
+
+      {/* Индикатор размера */}
+      <div className="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+        900 × 1200
       </div>
     </div>
   );
-};
+});
 
-export default React.memo(CanvasArea); 
+CanvasArea.displayName = 'CanvasArea';
+
+export default CanvasArea; 

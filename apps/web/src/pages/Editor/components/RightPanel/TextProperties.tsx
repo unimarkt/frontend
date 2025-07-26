@@ -1,219 +1,204 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import Input from '../../../../components/ui/Input';
 import Select from '../../../../components/ui/Select';
 
 interface TextPropertiesProps {
-  properties: any;
-  onChange: (properties: any) => void;
+  properties: {
+    text?: string;
+    fontSize?: number;
+    fontFamily?: string;
+    fontWeight?: number;
+    color?: string;
+    textAlign?: string;
+    lineHeight?: number;
+    letterSpacing?: number;
+  };
+  onUpdate: (updates: Partial<TextPropertiesProps['properties']>) => void;
 }
 
-const TextProperties: React.FC<TextPropertiesProps> = ({ properties, onChange }) => {
-  const [text, setText] = useState(properties.text || 'Текст');
-
+const TextProperties: React.FC<TextPropertiesProps> = ({
+  properties,
+  onUpdate
+}) => {
   const fontFamilies = [
+    { value: 'Manrope', label: 'Manrope' },
+    { value: 'Inter', label: 'Inter' },
     { value: 'Arial', label: 'Arial' },
     { value: 'Helvetica', label: 'Helvetica' },
     { value: 'Times New Roman', label: 'Times New Roman' },
-    { value: 'Georgia', label: 'Georgia' },
-    { value: 'Verdana', label: 'Verdana' },
-    { value: 'Courier New', label: 'Courier New' },
+    { value: 'Georgia', label: 'Georgia' }
   ];
 
   const fontWeights = [
-    { value: 'normal', label: 'Обычный' },
-    { value: 'bold', label: 'Жирный' },
-    { value: '100', label: '100' },
-    { value: '200', label: '200' },
-    { value: '300', label: '300' },
-    { value: '400', label: '400' },
-    { value: '500', label: '500' },
-    { value: '600', label: '600' },
-    { value: '700', label: '700' },
-    { value: '800', label: '800' },
-    { value: '900', label: '900' },
+    { value: '300', label: 'Light (300)' },
+    { value: '400', label: 'Regular (400)' },
+    { value: '500', label: 'Medium (500)' },
+    { value: '600', label: 'SemiBold (600)' },
+    { value: '700', label: 'Bold (700)' },
+    { value: '800', label: 'ExtraBold (800)' }
   ];
 
   const textAligns = [
     { value: 'left', label: 'По левому краю' },
     { value: 'center', label: 'По центру' },
     { value: 'right', label: 'По правому краю' },
-    { value: 'justify', label: 'По ширине' },
+    { value: 'justify', label: 'По ширине' }
   ];
 
-  const handleChange = useCallback((key: string, value: any) => {
-    const newProperties = { ...properties, [key]: value };
-    onChange(newProperties);
-  }, [properties, onChange]);
-
-  const handleTextChange = useCallback((value: string) => {
-    setText(value);
-    handleChange('text', value);
-  }, [handleChange]);
-
   return (
-    <div className="p-4 space-y-6">
+    <div className="px-4 py-3 border-t border-[#DFE1E7]">
+      <h4 className="text-[12px] font-medium text-black mb-3">Свойства текста</h4>
+      
       {/* Текст */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Текст
-        </label>
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Текст</label>
         <textarea
-          value={text}
-          onChange={(e) => handleTextChange(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          value={properties.text || ''}
+          onChange={(e) => onUpdate({ text: e.target.value })}
+          className="w-full px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent resize-none"
           rows={3}
           placeholder="Введите текст..."
         />
       </div>
 
-      {/* Шрифт */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Шрифт
-        </label>
-        <Select
-          value={properties.fontFamily || 'Arial'}
-          onChange={(value) => handleChange('fontFamily', value)}
-          options={fontFamilies}
-          className="w-full"
-        />
-      </div>
-
       {/* Размер шрифта */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Размер шрифта
-        </label>
-        <Input
-          type="number"
-          value={properties.fontSize || 20}
-          onChange={value => handleChange('fontSize', parseInt(value))}
-          min={8}
-          max={200}
-          className="w-full"
-        />
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Размер шрифта</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min="8"
+            max="200"
+            value={properties.fontSize || 16}
+            onChange={(e) => onUpdate({ fontSize: parseInt(e.target.value) || 16 })}
+            className="flex-1 px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
+          />
+          <span className="text-[12px] text-[#6F6F6F]">px</span>
+        </div>
       </div>
 
-      {/* Жирность шрифта */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Жирность
-        </label>
-        <Select
-          value={properties.fontWeight || 'normal'}
-          onChange={(value) => handleChange('fontWeight', value)}
-          options={fontWeights}
-          className="w-full"
-        />
+      {/* Семейство шрифтов */}
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Шрифт</label>
+        <select
+          value={properties.fontFamily || 'Manrope'}
+          onChange={(e) => onUpdate({ fontFamily: e.target.value })}
+          className="w-full px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
+        >
+          {fontFamilies.map(font => (
+            <option key={font.value} value={font.value}>
+              {font.label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Выравнивание */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Выравнивание
-        </label>
-        <Select
-          value={properties.textAlign || 'left'}
-          onChange={(value) => handleChange('textAlign', value)}
-          options={textAligns}
-          className="w-full"
-        />
+      {/* Вес шрифта */}
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Вес шрифта</label>
+        <select
+          value={properties.fontWeight?.toString() || '400'}
+          onChange={(e) => onUpdate({ fontWeight: parseInt(e.target.value) || 400 })}
+          className="w-full px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
+        >
+          {fontWeights.map(weight => (
+            <option key={weight.value} value={weight.value}>
+              {weight.label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Цвет */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Цвет
-        </label>
-        <div className="flex items-center space-x-2">
+      {/* Цвет текста */}
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Цвет текста</label>
+        <div className="flex items-center gap-2">
           <input
             type="color"
-            value={properties.fill || '#000000'}
-            onChange={(e) => handleChange('fill', e.target.value)}
-            className="w-10 h-10 border border-gray-300 rounded cursor-pointer"
+            value={properties.color || '#000000'}
+            onChange={(e) => onUpdate({ color: e.target.value })}
+            className="w-8 h-8 border border-[#DFE1E7] rounded cursor-pointer"
           />
-          <Input
-            value={properties.fill || '#000000'}
-            onChange={(value) => handleChange('fill', value)}
-            className="flex-1"
+          <input
+            type="text"
+            value={properties.color || '#000000'}
+            onChange={(e) => onUpdate({ color: e.target.value })}
+            className="flex-1 px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
             placeholder="#000000"
           />
         </div>
       </div>
 
+      {/* Выравнивание текста */}
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Выравнивание</label>
+        <select
+          value={properties.textAlign || 'left'}
+          onChange={(e) => onUpdate({ textAlign: e.target.value })}
+          className="w-full px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
+        >
+          {textAligns.map(align => (
+            <option key={align.value} value={align.value}>
+              {align.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Межстрочный интервал */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Межстрочный интервал
-        </label>
-        <Input
-          type="number"
-          value={properties.lineHeight || 1.2}
-          onChange={value => handleChange('lineHeight', parseFloat(value))}
-          min={0.5}
-          max={3}
-          step={0.1}
-          className="w-full"
-        />
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Межстрочный интервал</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min="0.5"
+            max="3"
+            step="0.1"
+            value={properties.lineHeight || 1.2}
+            onChange={(e) => onUpdate({ lineHeight: parseFloat(e.target.value) || 1.2 })}
+            className="flex-1 px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
+          />
+          <span className="text-[12px] text-[#6F6F6F]">em</span>
+        </div>
       </div>
 
       {/* Межбуквенный интервал */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Межбуквенный интервал
-        </label>
-        <Input
-          type="number"
-          value={properties.charSpacing || 0}
-          onChange={value => handleChange('charSpacing', parseInt(value))}
-          min={-10}
-          max={50}
-          className="w-full"
-        />
-      </div>
-
-      {/* Позиция */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            X
-          </label>
-          <Input
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Межбуквенный интервал</label>
+        <div className="flex items-center gap-2">
+          <input
             type="number"
-            value={Math.round(properties.left || 0)}
-            onChange={value => handleChange('left', parseInt(value))}
-            className="w-full"
+            min="-2"
+            max="10"
+            step="0.1"
+            value={properties.letterSpacing || 0}
+            onChange={(e) => onUpdate({ letterSpacing: parseFloat(e.target.value) || 0 })}
+            className="flex-1 px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Y
-          </label>
-          <Input
-            type="number"
-            value={Math.round(properties.top || 0)}
-            onChange={value => handleChange('top', parseInt(value))}
-            className="w-full"
-          />
+          <span className="text-[12px] text-[#6F6F6F]">px</span>
         </div>
       </div>
 
-      {/* Прозрачность */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Прозрачность
-        </label>
-        <Input
-          type="number"
-          value={Math.round((properties.opacity || 1) * 100)}
-          onChange={value => handleChange('opacity', parseInt(value) / 100)}
-          min={0}
-          max={100}
-          className="w-full"
-        />
+      {/* Предварительный просмотр */}
+      <div className="mt-4 p-3 bg-[#F6F8FA] rounded-[8px] border border-[#DFE1E7]">
+        <label className="block text-[12px] text-[#6F6F6F] mb-2">Предварительный просмотр</label>
+        <div
+          className="text-[14px] break-words"
+          style={{
+            fontFamily: properties.fontFamily || 'Manrope',
+            fontSize: `${properties.fontSize || 16}px`,
+            fontWeight: properties.fontWeight || 400,
+            color: properties.color || '#000000',
+            textAlign: (properties.textAlign as any) || 'left',
+            lineHeight: properties.lineHeight || 1.2,
+            letterSpacing: `${properties.letterSpacing || 0}px`
+          }}
+        >
+          {properties.text || 'Пример текста для предварительного просмотра'}
+        </div>
       </div>
     </div>
   );
 };
 
-export default React.memo(TextProperties); 
+export default TextProperties; 

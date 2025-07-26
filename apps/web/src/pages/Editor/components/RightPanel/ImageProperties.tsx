@@ -1,193 +1,191 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 
 interface ImagePropertiesProps {
-  properties: any;
-  onChange: (properties: any) => void;
+  properties: {
+    src?: string;
+    alt?: string;
+    opacity?: number;
+    scale?: number;
+    brightness?: number;
+    contrast?: number;
+    saturation?: number;
+  };
+  onUpdate: (updates: Partial<ImagePropertiesProps['properties']>) => void;
 }
 
-const ImageProperties: React.FC<ImagePropertiesProps> = ({ properties, onChange }) => {
-  const handleChange = useCallback((key: string, value: any) => {
-    const newProperties = { ...properties, [key]: value };
-    onChange(newProperties);
-  }, [properties, onChange]);
+const ImageProperties: React.FC<ImagePropertiesProps> = ({
+  properties,
+  onUpdate
+}) => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        onUpdate({ src: e.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Прозрачность */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Прозрачность
-        </label>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={Math.round((properties.opacity || 1) * 100)}
-          onChange={(e) => handleChange('opacity', parseInt(e.target.value) / 100)}
-          className="w-full"
-        />
-        <div className="text-xs text-gray-500 mt-1">
-          {Math.round((properties.opacity || 1) * 100)}%
+    <div className="px-4 py-3 border-t border-[#DFE1E7]">
+      <h4 className="text-[12px] font-medium text-black mb-3">Свойства изображения</h4>
+      
+      {/* Загрузка изображения */}
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Изображение</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileUpload}
+            className="hidden"
+            id="image-upload"
+          />
+          <label
+            htmlFor="image-upload"
+            className="flex-1 px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] text-[#6F6F6F] cursor-pointer hover:bg-[#ECEFF3] transition-colors text-center"
+          >
+            {properties.src ? 'Изменить изображение' : 'Выбрать изображение'}
+          </label>
         </div>
+      </div>
+
+      {/* Alt текст */}
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Alt текст</label>
+        <input
+          type="text"
+          value={properties.alt || ''}
+          onChange={(e) => onUpdate({ alt: e.target.value })}
+          className="w-full px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1264FF] focus:border-transparent"
+          placeholder="Описание изображения"
+        />
       </div>
 
       {/* Масштаб */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Масштаб X
-          </label>
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Масштаб</label>
+        <div className="flex items-center gap-2">
           <input
-            type="number"
-            value={properties.scaleX || 1}
-            onChange={(e) => handleChange('scaleX', parseFloat(e.target.value))}
+            type="range"
             min="0.1"
-            max="10"
+            max="3"
             step="0.1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            value={properties.scale || 1}
+            onChange={(e) => onUpdate({ scale: parseFloat(e.target.value) })}
+            className="flex-1 h-2 bg-[#DFE1E7] rounded-lg appearance-none cursor-pointer slider"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Масштаб Y
-          </label>
-          <input
-            type="number"
-            value={properties.scaleY || 1}
-            onChange={(e) => handleChange('scaleY', parseFloat(e.target.value))}
-            min="0.1"
-            max="10"
-            step="0.1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Позиция */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            X
-          </label>
-          <input
-            type="number"
-            value={Math.round(properties.left || 0)}
-            onChange={(e) => handleChange('left', parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Y
-          </label>
-          <input
-            type="number"
-            value={Math.round(properties.top || 0)}
-            onChange={(e) => handleChange('top', parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Поворот */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Поворот
-        </label>
-        <input
-          type="range"
-          min="0"
-          max="360"
-          value={properties.angle || 0}
-          onChange={(e) => handleChange('angle', parseInt(e.target.value))}
-          className="w-full"
-        />
-        <div className="text-xs text-gray-500 mt-1">
-          {Math.round(properties.angle || 0)}°
+          <span className="text-[12px] text-[#6F6F6F] min-w-[3rem] text-right">
+            {Math.round((properties.scale || 1) * 100)}%
+          </span>
         </div>
       </div>
 
       {/* Яркость */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Яркость
-        </label>
-        <input
-          type="range"
-          min="-100"
-          max="100"
-          value={properties.brightness || 0}
-          onChange={(e) => handleChange('brightness', parseInt(e.target.value))}
-          className="w-full"
-        />
-        <div className="text-xs text-gray-500 mt-1">
-          {properties.brightness || 0}%
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Яркость</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value={properties.brightness || 100}
+            onChange={(e) => onUpdate({ brightness: parseInt(e.target.value) })}
+            className="flex-1 h-2 bg-[#DFE1E7] rounded-lg appearance-none cursor-pointer slider"
+          />
+          <span className="text-[12px] text-[#6F6F6F] min-w-[3rem] text-right">
+            {properties.brightness || 100}%
+          </span>
         </div>
       </div>
 
       {/* Контрастность */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Контрастность
-        </label>
-        <input
-          type="range"
-          min="-100"
-          max="100"
-          value={properties.contrast || 0}
-          onChange={(e) => handleChange('contrast', parseInt(e.target.value))}
-          className="w-full"
-        />
-        <div className="text-xs text-gray-500 mt-1">
-          {properties.contrast || 0}%
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Контрастность</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value={properties.contrast || 100}
+            onChange={(e) => onUpdate({ contrast: parseInt(e.target.value) })}
+            className="flex-1 h-2 bg-[#DFE1E7] rounded-lg appearance-none cursor-pointer slider"
+          />
+          <span className="text-[12px] text-[#6F6F6F] min-w-[3rem] text-right">
+            {properties.contrast || 100}%
+          </span>
         </div>
       </div>
 
       {/* Насыщенность */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Насыщенность
-        </label>
-        <input
-          type="range"
-          min="-100"
-          max="100"
-          value={properties.saturation || 0}
-          onChange={(e) => handleChange('saturation', parseInt(e.target.value))}
-          className="w-full"
-        />
-        <div className="text-xs text-gray-500 mt-1">
-          {properties.saturation || 0}%
+      <div className="mb-3">
+        <label className="block text-[12px] text-[#6F6F6F] mb-1">Насыщенность</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value={properties.saturation || 100}
+            onChange={(e) => onUpdate({ saturation: parseInt(e.target.value) })}
+            className="flex-1 h-2 bg-[#DFE1E7] rounded-lg appearance-none cursor-pointer slider"
+          />
+          <span className="text-[12px] text-[#6F6F6F] min-w-[3rem] text-right">
+            {properties.saturation || 100}%
+          </span>
         </div>
       </div>
 
-      {/* Размеры */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ширина
-          </label>
-          <input
-            type="number"
-            value={Math.round(properties.width || 0)}
-            onChange={(e) => handleChange('width', parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
+      {/* Предварительный просмотр */}
+      {properties.src && (
+        <div className="mt-4 p-3 bg-[#F6F8FA] rounded-[8px] border border-[#DFE1E7]">
+          <label className="block text-[12px] text-[#6F6F6F] mb-2">Предварительный просмотр</label>
+          <div className="relative w-full h-32 bg-white rounded overflow-hidden">
+            <img
+              src={properties.src}
+              alt={properties.alt || 'Предварительный просмотр'}
+              className="w-full h-full object-cover"
+              style={{
+                filter: `
+                  brightness(${properties.brightness || 100}%) 
+                  contrast(${properties.contrast || 100}%) 
+                  saturate(${properties.saturation || 100}%)
+                `,
+                transform: `scale(${properties.scale || 1})`
+              }}
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Высота
-          </label>
-          <input
-            type="number"
-            value={Math.round(properties.height || 0)}
-            onChange={(e) => handleChange('height', parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          />
+      )}
+
+      {/* Быстрые действия */}
+      <div className="mt-4 pt-3 border-t border-[#DFE1E7]">
+        <h5 className="text-[12px] font-medium text-black mb-2">Быстрые действия</h5>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => onUpdate({ 
+              scale: 1, 
+              brightness: 100, 
+              contrast: 100, 
+              saturation: 100 
+            })}
+            className="px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[12px] text-[#6F6F6F] hover:bg-[#ECEFF3] transition-colors"
+          >
+            Сбросить
+          </button>
+          <button
+            onClick={() => onUpdate({ scale: 1.5 })}
+            className="px-3 py-2 bg-[#F6F8FA] border border-[#DFE1E7] rounded-[8px] text-[12px] text-[#6F6F6F] hover:bg-[#ECEFF3] transition-colors"
+          >
+            Увеличить
+          </button>
         </div>
       </div>
+
+
     </div>
   );
 };
 
-export default React.memo(ImageProperties); 
+export default ImageProperties; 
