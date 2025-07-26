@@ -20,18 +20,18 @@ const Header: React.FC = React.memo(() => (
     </div>
     <div className="flex items-center gap-5">
       <div className="relative">
-        <Button variant="outline" size="icon" className="w-10 h-10 rounded-full">
+        <Button className="w-10 h-10 rounded-full border border-gray-300 bg-white hover:bg-gray-50">
           <Bell className="w-5 h-5" />
         </Button>
         <Badge className="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full">
           7
         </Badge>
       </div>
-      <Button variant="primary" className="flex items-center gap-2 px-4 py-2 rounded-full" to="/new-product">
+      <Button className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500 text-white hover:bg-primary-600">
         <Plus className="w-5 h-5" />
         <span>Новый товар</span>
       </Button>
-      <Button variant="outline" className="flex items-center gap-2 py-1 pl-1 pr-3 bg-gray-100 rounded-full">
+      <Button className="flex items-center gap-2 py-1 pl-1 pr-3 bg-gray-100 rounded-full border border-gray-300 hover:bg-gray-200">
         <Avatar src="/user.jpg" alt="User profile" size="md" />
         <ChevronDown className="w-6 h-6" />
       </Button>

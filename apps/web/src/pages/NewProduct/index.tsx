@@ -14,7 +14,7 @@ const NewProductPage: React.FC = () => {
         <div className="h-full">
           <TemplatePreview />
         </div>
-        
+
         {/* Правая панель - Форма информации */}
         <div className="h-full">
           <ProductInfoForm />

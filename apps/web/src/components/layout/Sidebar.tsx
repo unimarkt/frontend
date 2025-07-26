@@ -60,7 +60,7 @@ const Sidebar: React.FC = React.memo(() => (
       </div>
     </nav>
     <div className="p-4">
-      <Button variant="ghost" size="icon" aria-label="Свернуть меню">
+      <Button className="p-2 text-gray-400 hover:text-gray-600" aria-label="Свернуть меню">
         <span className="sr-only">Свернуть меню</span>
       </Button>
     </div>

@@ -14,6 +14,10 @@ const TemplatePreview: React.FC = () => {
     navigate("/constructor/templates");
   };
 
+  const handleCreateCard = () => {
+    navigate("/editor/new");
+  };
+
   return (
     <Card className="h-full flex flex-col">
       <div className="flex-1">
@@ -45,6 +49,12 @@ const TemplatePreview: React.FC = () => {
           className="w-full bg-primary-500 text-white hover:bg-primary-600 px-4 py-2 rounded-lg transition-colors"
         >
           Создать с нуля
+        </Button>
+        <Button 
+          onClick={handleCreateCard}
+          className="w-full bg-green-500 text-white hover:bg-green-600 px-4 py-2 rounded-lg transition-colors"
+        >
+          Создать карточку
         </Button>
         <Button 
           onClick={handleChooseTemplate}

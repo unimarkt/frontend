@@ -18,6 +18,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     navigate(`/products/${product.id}`);
   };
 
+  const handleEditCard = () => {
+    navigate(`/editor/${product.id}`);
+  };
+
   const handleDuplicate = () => {
     // TODO: Реализовать дублирование
     console.log("Дублировать продукт:", product.id);
@@ -103,7 +107,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
                   >
                     <Edit size={14} />
-                    Редактировать
+                    Редактировать продукт
+                  </button>
+                  <button
+                    onClick={handleEditCard}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <Edit size={14} />
+                    Редактировать карточку
                   </button>
                   <button
                     onClick={handleDuplicate}
