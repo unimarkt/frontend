@@ -9,10 +9,11 @@ export interface LayoutProps {
   children: React.ReactNode;
   actions?: React.ReactNode;
   breadcrumbs?: BreadcrumbItem[];
+  hideSidebar?: boolean;
 }
-const Layout: React.FC<LayoutProps> = ({ title, subtitle, children, actions, breadcrumbs }) => (
+const Layout: React.FC<LayoutProps> = ({ title, subtitle, children, actions, breadcrumbs, hideSidebar = false }) => (
   <div className="flex min-h-screen bg-gray-50">
-    <Sidebar />
+    {!hideSidebar && <Sidebar />}
     <div className="flex-1 flex flex-col">
       <Header />
       <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-4">

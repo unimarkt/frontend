@@ -17,6 +17,8 @@ export const useFabricCanvas = (productId: string) => {
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [gridVisible, setGridVisible] = useState(true);
+  const [history, setHistory] = useState<any[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   // Инициализация canvas
   const initCanvas = useCallback(() => {
@@ -50,11 +52,12 @@ export const useFabricCanvas = (productId: string) => {
         obj.name = layer.name;
         
         setLayers(prev => [...prev, layer]);
+        saveToHistory();
       }
     });
 
     fabricCanvas.on('object:modified', () => {
-      saveCanvasState();
+      saveToHistory();
     });
 
     fabricCanvas.on('selection:created', (e: FabricEvent) => {
@@ -83,6 +86,27 @@ export const useFabricCanvas = (productId: string) => {
     }
   };
 
+  // Сохранение в историю
+  const saveToHistory = useCallback(() => {
+    if (!canvas) return;
+    
+    const canvasData = canvas.toJSON();
+    const historyItem = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      data: JSON.stringify(canvasData)
+    };
+    
+    setHistory(prev => {
+      const newHistory = [...prev.slice(0, historyIndex + 1), historyItem];
+      if (newHistory.length > 20) {
+        return newHistory.slice(-20);
+      }
+      return newHistory;
+    });
+    setHistoryIndex(prev => prev + 1);
+  }, [canvas, historyIndex]);
+
   // Сохранение состояния canvas
   const saveCanvasState = useCallback(() => {
     if (!canvas) return;
@@ -106,58 +130,42 @@ export const useFabricCanvas = (productId: string) => {
       try {
         const data = JSON.parse(savedData);
         canvas.loadFromJSON(JSON.parse(data.canvasData), () => {
-          // Обновляем слои после загрузки
-          const objects = canvas.getObjects();
-          const loadedLayers: Layer[] = objects.map((obj: any, index: number) => ({
-            id: obj.id || `layer-${index}`,
-            name: obj.name || `Слой ${index + 1}`,
-            type: getObjectType(obj),
-            visible: obj.visible !== false,
-            locked: false,
-            opacity: obj.opacity || 1,
-            zIndex: index,
-            fabricObject: obj,
-          }));
-          
-          setLayers(loadedLayers);
+          canvas.renderAll();
         });
       } catch (error) {
-        console.error('Ошибка загрузки состояния canvas:', error);
+        console.error('Error loading canvas state:', error);
       }
     }
   }, [canvas, productId]);
 
   // Добавление текста
-  const addText = useCallback((text = 'Новый текст') => {
+  const addText = useCallback((text = 'Текст', options = {}) => {
     if (!canvas) return;
-
-    const fabricText = new fabric.Textbox(text, {
+    
+    const textbox = new fabric.Textbox(text, {
       left: 100,
       top: 100,
       fontFamily: 'Arial',
       fontSize: 20,
       fill: '#000000',
-      width: 200,
-      editable: true,
+      ...options
     });
-
-    canvas.add(fabricText);
-    canvas.setActiveObject(fabricText);
+    
+    canvas.add(textbox);
+    canvas.setActiveObject(textbox);
     canvas.renderAll();
   }, [canvas]);
 
   // Добавление изображения
-  const addImage = useCallback((imageUrl: string) => {
+  const addImage = useCallback((imageUrl: string, options = {}) => {
     if (!canvas) return;
-
+    
     fabric.Image.fromURL(imageUrl, (img: any) => {
       img.set({
         left: 100,
         top: 100,
-        scaleX: 0.5,
-        scaleY: 0.5,
+        ...options
       });
-      
       canvas.add(img);
       canvas.setActiveObject(img);
       canvas.renderAll();
@@ -165,11 +173,11 @@ export const useFabricCanvas = (productId: string) => {
   }, [canvas]);
 
   // Добавление фигуры
-  const addShape = useCallback((shapeType: 'rect' | 'circle' | 'triangle') => {
+  const addShape = useCallback((shapeType: 'rect' | 'circle' | 'triangle', options = {}) => {
     if (!canvas) return;
-
+    
     let shape: any;
-
+    
     switch (shapeType) {
       case 'rect':
         shape = new fabric.Rect({
@@ -177,9 +185,8 @@ export const useFabricCanvas = (productId: string) => {
           top: 100,
           width: 100,
           height: 100,
-          fill: '#ff6b6b',
-          stroke: '#333',
-          strokeWidth: 2,
+          fill: '#ff0000',
+          ...options
         });
         break;
       case 'circle':
@@ -187,9 +194,8 @@ export const useFabricCanvas = (productId: string) => {
           left: 100,
           top: 100,
           radius: 50,
-          fill: '#4ecdc4',
-          stroke: '#333',
-          strokeWidth: 2,
+          fill: '#00ff00',
+          ...options
         });
         break;
       case 'triangle':
@@ -198,39 +204,38 @@ export const useFabricCanvas = (productId: string) => {
           top: 100,
           width: 100,
           height: 100,
-          fill: '#45b7d1',
-          stroke: '#333',
-          strokeWidth: 2,
+          fill: '#0000ff',
+          ...options
         });
         break;
-      default:
-        return;
     }
-
-    canvas.add(shape);
-    canvas.setActiveObject(shape);
-    canvas.renderAll();
+    
+    if (shape) {
+      canvas.add(shape);
+      canvas.setActiveObject(shape);
+      canvas.renderAll();
+    }
   }, [canvas]);
 
   // Удаление выбранного объекта
   const deleteSelected = useCallback(() => {
     if (!canvas) return;
-
+    
     const activeObject = canvas.getActiveObject();
     if (activeObject) {
       canvas.remove(activeObject);
       canvas.renderAll();
-      setSelectedLayerId(null);
+      saveToHistory();
     }
-  }, [canvas]);
+  }, [canvas, saveToHistory]);
 
-  // Изменение зума
-  const setZoomLevel = useCallback((newZoom: number) => {
+  // Установка масштаба
+  const setZoomLevel = useCallback((level: number) => {
     if (!canvas) return;
     
-    const zoomLevel = Math.max(0.1, Math.min(3, newZoom));
-    canvas.setZoom(zoomLevel);
-    setZoom(zoomLevel);
+    setZoom(level);
+    canvas.setZoom(level);
+    canvas.renderAll();
   }, [canvas]);
 
   // Переключение сетки
@@ -239,36 +244,61 @@ export const useFabricCanvas = (productId: string) => {
   }, []);
 
   // Экспорт в PNG
-  const exportToPNG = useCallback((quality = 1) => {
+  const exportToPNG = useCallback((options = {}) => {
     if (!canvas) return;
-
+    
     const dataURL = canvas.toDataURL({
       format: 'png',
-      quality: quality,
-      multiplier: 2,
+      quality: 1,
+      ...options
     });
-
+    
     const link = document.createElement('a');
-    link.download = `card-${productId}-${Date.now()}.png`;
+    link.download = `card-${productId}.png`;
     link.href = dataURL;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   }, [canvas, productId]);
 
-  // Очистка при размонтировании
-  useEffect(() => {
-    return () => {
-      if (canvas) {
-        canvas.dispose();
+  // Undo
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      const historyItem = history[newIndex];
+      if (historyItem && canvas) {
+        canvas.loadFromJSON(JSON.parse(historyItem.data), () => {
+          canvas.renderAll();
+        });
+        setHistoryIndex(newIndex);
       }
-    };
-  }, [canvas]);
+    }
+  }, [history, historyIndex, canvas]);
 
-  // Автосохранение
+  // Redo
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      const historyItem = history[newIndex];
+      if (historyItem && canvas) {
+        canvas.loadFromJSON(JSON.parse(historyItem.data), () => {
+          canvas.renderAll();
+        });
+        setHistoryIndex(newIndex);
+      }
+    }
+  }, [history, historyIndex, canvas]);
+
+  // Инициализация canvas при монтировании
   useEffect(() => {
-    const timer = setTimeout(saveCanvasState, 2000);
-    return () => clearTimeout(timer);
+    initCanvas();
+  }, [initCanvas]);
+
+  // Автосохранение каждые 2 секунды
+  useEffect(() => {
+    const interval = setInterval(() => {
+      saveCanvasState();
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, [saveCanvasState]);
 
   return {
@@ -278,6 +308,8 @@ export const useFabricCanvas = (productId: string) => {
     selectedLayerId,
     zoom,
     gridVisible,
+    canUndo: historyIndex > 0,
+    canRedo: historyIndex < history.length - 1,
     initCanvas,
     addText,
     addImage,
@@ -287,5 +319,7 @@ export const useFabricCanvas = (productId: string) => {
     toggleGrid,
     exportToPNG,
     saveCanvasState,
+    undo,
+    redo,
   };
 }; 
