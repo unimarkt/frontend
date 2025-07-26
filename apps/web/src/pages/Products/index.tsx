@@ -1,65 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Layout from "../../components/Layout";
-import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
+import Tabs from "../../components/ui/Tabs";
+import ProductsHeader from "./components/ProductsHeader";
+import ProductsGrid from "./components/ProductsGrid";
+import { useProductsFilter } from "./hooks/useProductsFilter";
+import { mockProducts } from "../Dashboard/mockData";
+import type { ProductsFilter } from "./hooks/useProductsFilter";
 
-const tabs = [
-  { label: "Все продукты", value: "all" },
-  { label: "Черновики", value: "drafts" },
-  { label: "Корзина", value: "trash" },
-];
+const ProductsPage: React.FC = () => {
+  const [filter, setFilter] = useState<ProductsFilter>({
+    search: "",
+    status: "all"
+  });
 
-const products = Array.from({ length: 8 }).map((_, i) => ({
-  id: i + 1,
-  name: "Светильник",
-  items: 5,
-  cards: 10,
-}));
+  const filteredProducts = useProductsFilter(mockProducts, filter);
 
-const Products: React.FC = () => {
-  const [tab, setTab] = useState("all");
-  const [search, setSearch] = useState("");
+  const tabs = [
+    { id: "all", label: "Все", count: mockProducts.length },
+    { id: "active", label: "Активные", count: mockProducts.filter(p => p.status === "active").length },
+    { id: "draft", label: "Черновики", count: mockProducts.filter(p => p.status === "draft").length },
+    { id: "trash", label: "Корзина", count: mockProducts.filter(p => p.status === "trash").length }
+  ];
+
+  const handleSearchChange = useCallback((value: string) => {
+    setFilter(prev => ({ ...prev, search: value }));
+  }, []);
+
+  const handleTabChange = useCallback((value: string) => {
+    setFilter(prev => ({ 
+      ...prev, 
+      status: value as ProductsFilter["status"] 
+    }));
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    // TODO: Реализовать загрузку дополнительных продуктов
+    console.log("Загрузить еще продуктов");
+  }, []);
 
   return (
-    <Layout title="Каталог продуктов">
-      <div className="flex flex-col gap-8">
-        {/* Табы и действия */}
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <Button className="h-[48px] px-6 text-base">+ Новый продукт</Button>
-          <div className="flex gap-2 flex-1">
-            {tabs.map(t => (
-              <button
-                key={t.value}
-                className={`h-[48px] px-6 rounded-[12px] text-base font-medium transition border-none ${tab === t.value ? "bg-primary-500 text-white" : "bg-gray-100 text-gray-500"}`}
-                onClick={() => setTab(t.value)}
-              >
-                {t.label}
-                {t.value === "all" && <span className="ml-2 bg-white text-primary-500 rounded-full px-2 py-0.5 text-xs">23</span>}
-                {t.value === "drafts" && <span className="ml-2 bg-white text-primary-500 rounded-full px-2 py-0.5 text-xs">4</span>}
-              </button>
-            ))}
-          </div>
-          <Input
-            placeholder="Найти продукт..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full md:w-64"
-          />
-        </div>
+    <Layout
+      title="Продукты"
+      subtitle="Управляйте вашими продуктами и товарами"
+    >
+      <div className="space-y-6">
+        {/* Заголовок с поиском */}
+        <ProductsHeader
+          search={filter.search}
+          onSearchChange={handleSearchChange}
+        />
+
+        {/* Табы */}
+        <Tabs
+          tabs={tabs}
+          value={filter.status}
+          onChange={handleTabChange}
+          className="mb-6"
+        />
+
         {/* Сетка продуктов */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map(p => (
-            <Card key={p.id} className="flex flex-col items-start gap-4 cursor-pointer hover:bg-primary-50 transition">
-              <div className="w-full h-48 bg-gradient-to-b from-gray-100 to-gray-300 rounded-[16px] mb-2" />
-              <div className="font-bold text-lg">{p.name}</div>
-              <div className="text-sm text-gray-500">{p.items} товаров • {p.cards} карточек</div>
-              <Button className="mt-auto h-[40px] px-4 text-sm">Редактировать</Button>
-            </Card>
-          ))}
-        </div>
+        <ProductsGrid
+          products={filteredProducts}
+          onLoadMore={handleLoadMore}
+        />
       </div>
     </Layout>
   );
 };
-export default Products; 
+
+export default ProductsPage; 
