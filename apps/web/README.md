@@ -1,69 +1,157 @@
-# React + TypeScript + Vite
+# UniMart - Платформа для создания карточек товаров
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+UniMart - это современная веб-платформа для автоматизации создания карточек товаров маркетплейсов. Приложение построено на React 18 с TypeScript и использует современный стек технологий.
 
-Currently, two official plugins are available:
+## 🚀 Быстрый старт
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+### Установка зависимостей
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+### Запуск в режиме разработки
+```bash
+npm run dev
 ```
+
+Приложение будет доступно по адресу: `http://localhost:5173`
+
+### Сборка для продакшена
+```bash
+npm run build
+```
+
+## 📁 Структура проекта
+
+```
+src/
+├── components/
+│   ├── Layout/           # Компоненты макета
+│   │   ├── Header.tsx    # Верхняя панель
+│   │   ├── Sidebar.tsx   # Боковое меню
+│   │   └── Layout.tsx    # Основной макет
+│   └── ui/               # UI компоненты
+│       ├── Button.tsx    # Кнопки
+│       ├── Card.tsx      # Карточки
+│       ├── Input.tsx     # Поля ввода
+│       └── ...
+├── pages/                # Страницы приложения
+│   ├── Dashboard/        # Главная страница
+│   ├── Products/         # Управление продуктами
+│   ├── Editor/           # Визуальный редактор
+│   └── InDevelopment/    # Страницы в разработке
+├── assets/               # Ресурсы
+│   └── icons/           # Иконки
+└── hooks/               # React хуки
+```
+
+## 🎨 Дизайн-система
+
+### Цветовая палитра
+- **Primary**: `#3B82F6` (синий)
+- **Success**: `#10B981` (зеленый)
+- **Warning**: `#F59E0B` (желтый)
+- **Error**: `#EF4444` (красный)
+
+### Типографика
+- **Шрифт**: Manrope
+- **Размеры**: 12px, 14px, 16px, 18px, 24px, 32px
+- **Веса**: 300, 400, 500, 600, 700, 800
+
+## 🧭 Навигация
+
+### Основные маршруты
+- `/` - Главная страница (Dashboard)
+- `/products` - Список продуктов
+- `/products/new` - Создание нового продукта
+- `/products/:id` - Детали продукта
+- `/products/:id/edit` - Редактирование продукта
+- `/editor/:productId` - Визуальный редактор
+
+### Страницы в разработке
+- `/constructor` - Конструктор карточек
+- `/styles` - Управление стилями
+- `/templates` - Галерея шаблонов
+- `/analytics` - Аналитика
+- `/basket` - Корзина
+- `/profile` - Профиль пользователя
+
+## 🔧 Технологии
+
+- **React 18** - Основной фреймворк
+- **TypeScript** - Типизация
+- **Vite** - Сборщик
+- **TailwindCSS** - Стилизация
+- **React Router v6** - Маршрутизация
+- **Lucide React** - Иконки
+- **React Hot Toast** - Уведомления
+
+## 📱 Responsive дизайн
+
+Приложение адаптировано для всех устройств:
+- **Desktop**: 1200px+
+- **Tablet**: 768px - 1199px
+- **Mobile**: 320px - 767px
+
+## 🎯 Функциональность
+
+### ✅ Реализовано
+- [x] Навигационная система
+- [x] Главная страница с дашбордом
+- [x] Список продуктов с фильтрацией
+- [x] Визуальный редактор карточек
+- [x] Компонент заглушек для страниц в разработке
+- [x] Адаптивный дизайн
+- [x] TypeScript типизация
+
+### 🚧 В разработке
+- [ ] Конструктор карточек
+- [ ] Управление стилями
+- [ ] Галерея шаблонов
+- [ ] Аналитика и отчеты
+- [ ] Система уведомлений
+- [ ] Профиль пользователя
+
+## 🐛 Отладка
+
+### Логи разработки
+```bash
+npm run dev
+```
+
+### Проверка типов
+```bash
+npm run type-check
+```
+
+### Линтинг
+```bash
+npm run lint
+```
+
+## 📦 Развертывание
+
+### Локальная сборка
+```bash
+npm run build
+```
+
+### Предпросмотр сборки
+```bash
+npm run preview
+```
+
+## 🤝 Вклад в проект
+
+1. Форкните репозиторий
+2. Создайте ветку для новой функции
+3. Внесите изменения
+4. Создайте Pull Request
+
+## 📄 Лицензия
+
+MIT License
+
+---
+
+**UniMart** - Создавайте потрясающие карточки товаров! 🚀

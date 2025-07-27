@@ -16,7 +16,7 @@ const ProductsHeader: React.FC<ProductsHeaderProps> = ({
   const navigate = useNavigate();
 
   const handleCreateProduct = () => {
-    navigate("/new-product");
+    navigate("/products/new");
   };
 
   return (
