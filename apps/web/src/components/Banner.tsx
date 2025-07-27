@@ -13,27 +13,27 @@ const Banner: React.FC = () => {
 
   const actions = [
     {
-      icon: <NewProductIcon className="w-8 h-8" />,
+      icon: <NewProductIcon className="w-6 h-6" />,
       label: "Новый продукт",
       onClick: () => navigate("/products/new")
     },
     {
-      icon: <NewTemplateIcon className="w-8 h-8" />,
+      icon: <NewTemplateIcon className="w-6 h-6" />,
       label: "Новый шаблон",
       onClick: () => navigate("/templates")
     },
     {
-      icon: <NewStyleIcon className="w-8 h-8" />,
+      icon: <NewStyleIcon className="w-6 h-6" />,
       label: "Новый стиль",
       onClick: () => navigate("/styles")
     },
     {
-      icon: <ImportImageIcon className="w-8 h-8" />,
+      icon: <ImportImageIcon className="w-6 h-6" />,
       label: "Импортировать изображение",
       onClick: () => navigate("/constructor")
     },
     {
-      icon: <TemplateGalleryIcon className="w-8 h-8" />,
+      icon: <TemplateGalleryIcon className="w-6 h-6" />,
       label: "Галерея шаблонов",
       onClick: () => navigate("/templates")
     }
@@ -47,27 +47,27 @@ const Banner: React.FC = () => {
         </h1>
       </div>
       
-      <div className="flex justify-center items-start gap-8">
+      <div className="flex justify-center items-start gap-6">
         {actions.map((action, index) => (
           <button
             key={index}
             onClick={action.onClick}
-            className="flex flex-col items-center gap-3 group"
+            className="flex flex-col items-center gap-3 group w-[72px]"
           >
-            <div className="w-16 h-16 bg-white rounded-full border border-gray-300 flex items-center justify-center group-hover:shadow-lg group-hover:border-gray-400 transition-all duration-200">
-              <div className="text-black group-hover:scale-110 transition-transform duration-200">
+            <div className="w-[50px] h-[50px] bg-[#71a2ff] group-hover:bg-white rounded-full flex items-center justify-center transition-all duration-200">
+              <div className="text-white group-hover:text-black transition-colors duration-200">
                 {action.icon}
               </div>
             </div>
-            <div className="text-center h-12 flex flex-col justify-start">
+            <div className="text-center min-h-[48px] flex flex-col justify-start">
               {action.label.includes(" ") ? (
-                <div className="text-white text-sm font-medium leading-tight group-hover:text-white/90 transition-colors">
+                <div className="text-white text-xs font-semibold leading-tight group-hover:text-white/90 transition-colors">
                   {action.label.split(" ").map((word, i) => (
                     <div key={i} className="leading-tight">{word}</div>
                   ))}
                 </div>
               ) : (
-                <div className="text-white text-sm font-medium group-hover:text-white/90 transition-colors">
+                <div className="text-white text-xs font-semibold group-hover:text-white/90 transition-colors">
                   {action.label}
                 </div>
               )}

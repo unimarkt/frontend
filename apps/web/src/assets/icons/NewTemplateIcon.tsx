@@ -20,35 +20,28 @@ const NewTemplateIcon: React.FC<NewTemplateIconProps> = ({
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+      d="M3 3h6v6H3V3z"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M14 2v6h6"
+      d="M15 3h6v6h-6V3z"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M8 12h8"
+      d="M3 15h6v6H3v-6z"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M8 16h8"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M8 20h8"
+      d="M15 15h6v6h-6v-6z"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"

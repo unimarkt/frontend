@@ -26,13 +26,6 @@ const NewProductIcon: React.FC<NewProductIconProps> = ({
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path
-      d="M9 7l2 2m0 0l2-2m-2 2V5"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
   </svg>
 );
 
