@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 import toast from "react-hot-toast";
 import Layout from "../../components/Layout";
 import Card from "../../components/ui/Card";
