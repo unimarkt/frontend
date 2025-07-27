@@ -8,6 +8,7 @@ import RichTextEditor from './components/RichTextEditor';
 import ImageProperties from './components/ImageProperties';
 import LayersPanel from './components/LayersPanel';
 import ShortcutsHelp from './components/ShortcutsHelp';
+import InlineTextEditor from './components/InlineTextEditor';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import type { TextLayer, ImageLayer, ShapeLayer, GroupLayer, Layer } from './types/editor.types';
@@ -18,6 +19,7 @@ const EditorPage: React.FC = () => {
   // Состояние редактора
   const [layers, setLayers] = useState<Layer[]>([]);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100);
   const [showGrid, setShowGrid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +45,21 @@ const EditorPage: React.FC = () => {
     const cleanup = setupGlobalListeners();
     return cleanup;
   }, [setupGlobalListeners]);
+
+  // Обработчики inline редактирования текста
+  const handleStartTextEdit = (layerId: string) => {
+    setEditingTextId(layerId);
+    setSelectedLayerId(layerId);
+  };
+
+  const handleFinishTextEdit = (layerId: string, text: string) => {
+    handleUpdateLayer(layerId, { text });
+    setEditingTextId(null);
+  };
+
+  const handleCancelTextEdit = () => {
+    setEditingTextId(null);
+  };
 
   // Функции для перемещения объектов
   const nudgeLayer = (direction: 'up' | 'down' | 'left' | 'right', amount: number) => {
@@ -75,7 +92,7 @@ const EditorPage: React.FC = () => {
       id: `text-${Date.now()}`,
       name: 'Новый текст',
       type: 'text',
-      text: 'Введите текст',
+      text: 'Двойной клик для редактирования',
       x: 100,
       y: 100,
       width: 200,
@@ -174,6 +191,7 @@ const EditorPage: React.FC = () => {
     if (selectedLayerId) {
       setLayers(prev => prev.filter(layer => layer.id !== selectedLayerId));
       setSelectedLayerId(null);
+      setEditingTextId(null);
       toast.success('Слой удален');
     }
   };
@@ -295,7 +313,10 @@ const EditorPage: React.FC = () => {
     onNudgeDownLarge: () => nudgeLayer('down', 10),
     onNudgeLeftLarge: () => nudgeLayer('left', 10),
     onNudgeRightLarge: () => nudgeLayer('right', 10),
-    onDeselect: () => setSelectedLayerId(null),
+    onDeselect: () => {
+      setSelectedLayerId(null);
+      setEditingTextId(null);
+    },
   });
 
   return (
@@ -459,6 +480,7 @@ const EditorPage: React.FC = () => {
                     
                     const isSelected = selectedLayerId === layer.id;
                     const isDragging = dragState.isDragging && dragState.layerId === layer.id;
+                    const isEditing = editingTextId === layer.id;
                     
                     switch (layer.type) {
                       case 'text':
@@ -480,21 +502,14 @@ const EditorPage: React.FC = () => {
                             onMouseDown={(e) => handleMouseDown(e, layer.id)}
                             onClick={() => setSelectedLayerId(layer.id)}
                           >
-                            <div
-                              style={{
-                                fontSize: layer.fontSize,
-                                fontFamily: layer.fontFamily,
-                                fontWeight: layer.fontWeight,
-                                color: layer.fontColor,
-                                textAlign: layer.textAlign,
-                                lineHeight: layer.lineHeight,
-                                letterSpacing: layer.letterSpacing,
-                                textDecoration: layer.textDecoration,
-                                textShadow: layer.textShadow,
-                              }}
-                            >
-                              {layer.text}
-                            </div>
+                            <InlineTextEditor
+                              layer={layer}
+                              isEditing={isEditing}
+                              onStartEdit={() => handleStartTextEdit(layer.id)}
+                              onFinishEdit={(text) => handleFinishTextEdit(layer.id, text)}
+                              onCancelEdit={handleCancelTextEdit}
+                              onUpdate={(updates) => handleUpdateLayer(layer.id, updates)}
+                            />
                           </div>
                         );
                         
