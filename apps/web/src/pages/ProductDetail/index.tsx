@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Layout from "../../components/Layout";
+import MainContent from "../../components/layout/MainContent";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import ProductCardLarge from "./components/ProductCardLarge";
 import ProductEditForm from "./components/ProductEditForm";
@@ -16,17 +16,17 @@ const ProductDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout title="Загрузка...">
+      <MainContent>
         <div className="flex justify-center items-center h-64">
           <LoadingSpinner size="lg" />
         </div>
-      </Layout>
+      </MainContent>
     );
   }
 
   if (error || !product) {
     return (
-      <Layout title="Ошибка">
+      <MainContent>
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
             <span className="text-2xl">❌</span>
@@ -44,7 +44,7 @@ const ProductDetailPage: React.FC = () => {
             Вернуться к продуктам
           </button>
         </div>
-      </Layout>
+      </MainContent>
     );
   }
 
@@ -54,11 +54,7 @@ const ProductDetailPage: React.FC = () => {
   ];
 
   return (
-    <Layout
-      title={product.name}
-      subtitle="Детальная информация о продукте"
-      breadcrumbs={breadcrumbs}
-    >
+    <MainContent>
       <div className="space-y-8">
         {/* Двухколоночный макет */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -81,7 +77,7 @@ const ProductDetailPage: React.FC = () => {
           <ItemsGrid items={items} />
         </div>
       </div>
-    </Layout>
+    </MainContent>
   );
 };
 

@@ -4,14 +4,12 @@ interface LayersIconProps {
   width?: number;
   height?: number;
   className?: string;
-  color?: string;
 }
 
 const LayersIcon: React.FC<LayersIconProps> = ({ 
   width = 25, 
   height = 25, 
-  className = '',
-  color = '#F8FAFB'
+  className = ''
 }) => {
   return (
     <svg 
@@ -22,9 +20,9 @@ const LayersIcon: React.FC<LayersIconProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      <path d="M12.5 3.5L21.5 8.5L12.5 13.5L3.5 8.5L12.5 3.5Z" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M3.5 16.5L12.5 21.5L21.5 16.5" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M3.5 12.5L12.5 17.5L21.5 12.5" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12.5 3.5L3.5 8.5L12.5 13.5L21.5 8.5L12.5 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3.5 16.5L12.5 21.5L21.5 16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3.5 12.5L12.5 17.5L21.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 };

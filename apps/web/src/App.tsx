@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 
 // Lazy loading для страниц
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const HomePage = React.lazy(() => import('./pages/Dashboard/HomePage'));
 const NewProductPage = React.lazy(() => import('./pages/Products/NewProduct'));
 const ProductsPage = React.lazy(() => import('./pages/Products'));
 const ProductDetailPage = React.lazy(() => import('./pages/ProductDetail'));
@@ -38,8 +38,11 @@ export default function App() {
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* Основные страницы */}
-          <Route path="/" element={<Dashboard />} />
+          {/* Главная страница */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
+          
+          {/* Страницы продуктов */}
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/new" element={<NewProductPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />

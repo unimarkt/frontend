@@ -1,18 +1,26 @@
-import React from "react";
-import Banner from "../Banner";
-import TemplateList from "../TemplateList";
-import Gallery from "../Gallery";
-import ProductList from "../ProductList";
+import React from 'react';
+import Sidebar from './Sidebar';
+import Header from './Header';
 
-const MainContent: React.FC = React.memo(() => (
-  <main className="flex-1 flex flex-col gap-8 p-6">
-    <Banner />
-    <div className="flex flex-col md:flex-row gap-8">
-      <TemplateList />
-      <Gallery />
+interface MainContentProps {
+  children: React.ReactNode;
+}
+
+const MainContent: React.FC<MainContentProps> = ({ children }) => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+      {/* Sidebar */}
+      <Sidebar />
+      
+      {/* Header */}
+      <Header />
+      
+      {/* Main Content */}
+      <main className="flex-1 p-6 ml-24 mt-16">
+        {children}
+      </main>
     </div>
-    <ProductList />
-  </main>
-));
+  );
+};
 
 export default MainContent; 
