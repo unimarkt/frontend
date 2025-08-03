@@ -50,18 +50,7 @@ export default function App() {
           <Route path="/editor/:productId" element={<EditorPage />} />
           
           {/* Страницы в разработке */}
-          <Route path="/constructor" element={
-            <InDevelopment 
-              pageName="Конструктор" 
-              expectedDate="Q1 2024"
-              features={[
-                "Визуальный редактор карточек товаров",
-                "Drag & Drop интерфейс",
-                "Готовые шаблоны",
-                "Экспорт в различные форматы"
-              ]}
-            />
-          } />
+          <Route path="/constructor" element={<EditorPage />} />
           
           <Route path="/styles" element={
             <InDevelopment 

@@ -1,34 +1,38 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-24 bg-gray-50 flex flex-col items-center py-6 z-50">
+    <div className="fixed left-0 top-0 h-full w-24 bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 z-50">
       {/* Logo */}
-      <img src="/img/logo.png" alt="UniMart" className="w-8 h-8 mb-8 cursor-pointer" onClick={() => navigate('/')} />
-      
+      <div className="mb-8">
+        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+          <img src="/img/Logo.png" alt="Logo" className="w-8 h-8" />
+        </div>
+      </div>
+
       {/* Menu Items - выравнивание по центру экрана */}
       <div className="flex-1 flex flex-col items-center justify-center space-y-4">
         {/* Home */}
         <div className="relative group">
-          <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center cursor-pointer">
+          <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/')}>
             <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 17.5002H16M11.0177 3.26424L4.23539 8.53937C3.78202 8.89199 3.55534 9.0683 3.39203 9.2891C3.24737 9.48469 3.1396 9.70503 3.07403 9.9393C3 10.2038 3 10.4909 3 11.0653V18.3002C3 19.4203 3 19.9804 3.21799 20.4082C3.40973 20.7845 3.71569 21.0905 4.09202 21.2822C4.51984 21.5002 5.07989 21.5002 6.2 21.5002H17.8C18.9201 21.5002 19.4802 21.5002 19.908 21.2822C20.2843 21.0905 20.5903 20.7845 20.782 20.4082C21 19.9804 21 19.4203 21 18.3002V11.0653C21 10.4909 21 10.2038 20.926 9.9393C20.8604 9.70503 20.7526 9.48469 20.608 9.2891C20.4447 9.0683 20.218 8.89199 19.7646 8.53937L12.9823 3.26424C12.631 2.99099 12.4553 2.85436 12.2613 2.80184C12.0902 2.7555 11.9098 2.7555 11.7387 2.80184C11.5447 2.85436 11.369 2.99099 11.0177 3.26424Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 17.5002H16M11.0177 3.26424L4.23539 8.53937C3.78202 8.89199 3.55534 9.0683 3.39203 9.2891C3.24737 9.48469 3.1396 9.70503 3.07403 9.9393C3 10.2038 3 10.4909 3 11.0653V18.3002C3 19.4203 3 19.9804 3.21799 20.4082C3.40973 20.7845 3.71569 21.0905 4.09202 21.2822C4.51984 21.5002 5.07989 21.5002 6.2 21.5002H17.8C18.9201 21.5002 19.4802 21.5002 19.908 21.2822C20.2843 21.0905 20.5903 20.7845 20.782 20.4082C21 19.9804 21 19.4203 21 18.3002V11.0653C21 10.4909 21 10.2038 20.926 9.9393C20.8604 9.70503 20.7526 9.48469 20.608 9.2891C20.4447 9.0683 20.218 8.89199 19.7646 8.53937L12.9823 3.26424C12.631 2.99099 12.4553 2.85436 12.2613 2.80184C12.0902 2.7555 11.9098 2.7555 11.7387 2.80184C11.5447 2.85436 11.369 2.99099 11.0177 3.26424Z" className="group-hover:stroke-white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <div className="absolute left-full ml-3 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2">
-            Домой
+            Главная
           </div>
         </div>
-        
+
         {/* Products */}
         <div className="relative group">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/products')}>
             <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g clipPath="url(#clip0_10003_151)">
-                <path d="M4 8.5H20V5.5H4V8.5ZM14 19.5V10.5H10V19.5H14ZM16 19.5H20V10.5H16V19.5ZM8 19.5V10.5H4V19.5H8ZM3 3.5H21C21.2652 3.5 21.5196 3.60536 21.7071 3.79289C21.8946 3.98043 22 4.23478 22 4.5V20.5C22 20.7652 21.8946 21.0196 21.7071 21.2071C21.5196 21.3946 21.2652 21.5 21 21.5H3C2.73478 21.5 2.48043 21.3946 2.29289 21.2071C2.10536 21.0196 2 20.7652 2 20.5V4.5C2 4.23478 2.10536 3.98043 2.29289 3.79289C2.48043 3.60536 2.73478 3.5 3 3.5Z" className="group-hover:fill-white" fill="currentColor"/>
+                <path d="M4 8.5H20V5.5H4V8.5ZM14 19.5V10.5H10V19.5H14ZM16 19.5H20V10.5H16V19.5ZM8 19.5V10.5H4V19.5H8ZM3 3.5H21C21.2652 3.5 21.5196 3.60536 21.7071 3.79289C21.8946 3.98043 22 4.23478 22 4.5V20.5C22 20.7652 21.8946 21.0196 21.7071 21.2071C21.5196 21.3946 21.2652 21.5001 21 21.5001H3C2.73478 21.5001 2.48043 21.3946 2.29289 21.2071C2.10536 21.0196 2 20.7652 2 20.5V4.5C2 4.23478 2.10536 3.98043 2.29289 3.79289C2.48043 3.60536 2.73478 3.5 3 3.5Z" className="group-hover:fill-white" fill="currentColor"/>
               </g>
               <defs>
                 <clipPath id="clip0_10003_151">
@@ -41,11 +45,8 @@ const Sidebar: React.FC = () => {
             Продукты
           </div>
         </div>
-        
-        {/* Separator */}
-        <div className="w-8 h-px bg-gray-300"></div>
-        
-        {/* Editor */}
+
+        {/* Constructor */}
         <div className="relative group">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/constructor')}>
             <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -63,8 +64,8 @@ const Sidebar: React.FC = () => {
             Конструктор
           </div>
         </div>
-        
-        {/* Design */}
+
+        {/* Templates */}
         <div className="relative group">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/templates')}>
             <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -82,10 +83,7 @@ const Sidebar: React.FC = () => {
             Шаблоны
           </div>
         </div>
-        
-        {/* Separator */}
-        <div className="w-8 h-px bg-gray-300"></div>
-        
+
         {/* Analytics */}
         <div className="relative group">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/analytics')}>
@@ -104,25 +102,22 @@ const Sidebar: React.FC = () => {
             Аналитика
           </div>
         </div>
-        
-        {/* Links */}
+
+        {/* API */}
         <div className="relative group">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors">
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/api')}>
             <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M13.0598 8.61023L14.4748 10.0252C15.1249 10.6753 15.6405 11.447 15.9924 12.2963C16.3442 13.1456 16.5253 14.0559 16.5253 14.9752C16.5253 15.8945 16.3442 16.8049 15.9924 17.6542C15.6405 18.5035 15.1249 19.2752 14.4748 19.9252L14.1208 20.2782C12.8079 21.5911 11.0274 22.3286 9.17077 22.3286C7.31416 22.3286 5.53359 21.5911 4.22077 20.2782C2.90795 18.9654 2.17041 17.1848 2.17041 15.3282C2.17041 13.4716 2.90795 11.6911 4.22077 10.3782L5.63577 11.7932C5.16814 12.2568 4.79667 12.8081 4.5427 13.4156C4.28872 14.0231 4.15724 14.6748 4.1558 15.3333C4.15435 15.9917 4.28298 16.644 4.53429 17.2526C4.78561 17.8612 5.15465 18.4142 5.62025 18.8798C6.08585 19.3453 6.63882 19.7144 7.24743 19.9657C7.85603 20.217 8.50828 20.3456 9.16673 20.3442C9.82518 20.3428 10.4769 20.2113 11.0844 19.9573C11.6919 19.7033 12.2432 19.3319 12.7068 18.8642L13.0608 18.5102C13.9981 17.5726 14.5247 16.3011 14.5247 14.9752C14.5247 13.6494 13.9981 12.3779 13.0608 11.4402L11.6458 10.0252L13.0608 8.61123L13.0598 8.61023ZM19.7778 14.6212L18.3638 13.2072C18.8314 12.7437 19.2029 12.1923 19.4568 11.5848C19.7108 10.9773 19.8423 10.3256 19.8437 9.6672C19.8452 9.00875 19.7166 8.3565 19.4652 7.74789C19.2139 7.13928 18.8449 6.58631 18.3793 6.12071C17.9137 5.65512 17.3607 5.28607 16.7521 5.03476C16.1435 4.78345 15.4913 4.65482 14.8328 4.65626C14.1744 4.6577 13.5227 4.78919 12.9152 5.04316C12.3077 5.29714 11.7563 5.6686 11.2928 6.13623L10.9388 6.49023C10.0014 7.42787 9.47484 8.69941 9.47484 10.0252C9.47484 11.3511 10.0014 12.6226 10.9388 13.5602L12.3538 14.9752L10.9388 16.3892L9.52477 14.9752C8.87468 14.3252 8.359 13.5535 8.00717 12.7042C7.65535 11.8549 7.47426 10.9445 7.47426 10.0252C7.47426 9.10592 7.65535 8.19561 8.00717 7.34628C8.359 6.49696 8.87468 5.72525 9.52477 5.07523L9.87877 4.72223C11.1916 3.40941 12.9722 2.67188 14.8288 2.67188C16.6854 2.67188 18.4659 3.40941 19.7788 4.72223C21.0916 6.03505 21.8291 7.81562 21.8291 9.67223C21.8291 11.5288 21.0916 13.3094 19.7788 14.6222L19.7778 14.6212Z" className="group-hover:fill-white" fill="currentColor"/>
             </svg>
           </div>
           <div className="absolute left-full ml-3 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2">
-            Работа с API
+            API
           </div>
         </div>
-        
-        {/* Separator */}
-        <div className="w-8 h-px bg-gray-300"></div>
-        
+
         {/* Trash */}
         <div className="relative group">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/basket')}>
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors" onClick={() => navigate('/trash')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g clipPath="url(#clip0_9893_1424)">
                 <path d="M17 6H22V8H20V21C20 21.2652 19.8946 21.5196 19.7071 21.7071C19.5196 21.8946 19.2652 22 19 22H5C4.73478 22 4.48043 21.8946 4.29289 21.7071C4.10536 21.5196 4 21.2652 4 21V8H2V6H7V3C7 2.73478 7.10536 2.48043 7.29289 2.29289C7.48043 2.10536 7.73478 2 8 2H16C16.2652 2 16.5196 2.10536 16.7071 2.29289C16.8946 2.48043 17 2.73478 17 3V6ZM18 8H6V20H18V8ZM9 11H11V17H9V11ZM13 11H15V17H13V11ZM9 4V6H15V4H9Z" className="group-hover:fill-white" fill="currentColor"/>
@@ -137,6 +132,25 @@ const Sidebar: React.FC = () => {
           <div className="absolute left-full ml-3 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2">
             Корзина
           </div>
+        </div>
+      </div>
+
+      {/* Back Button */}
+      <div className="relative group mt-auto">
+        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-black hover:text-white transition-colors">
+          <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clipPath="url(#clip0_10022_6377)">
+              <path d="M11.328 12L16.278 16.95L14.864 18.364L8.5 12L14.864 5.63599L16.278 7.04999L11.328 12Z" className="group-hover:fill-white" fill="currentColor"/>
+            </g>
+            <defs>
+              <clipPath id="clip0_10022_6377">
+                <rect width="24" height="24" fill="white" transform="translate(0.5)"/>
+              </clipPath>
+            </defs>
+          </svg>
+        </div>
+        <div className="absolute left-full ml-3 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2">
+          Назад
         </div>
       </div>
     </div>

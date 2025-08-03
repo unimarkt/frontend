@@ -47,66 +47,152 @@ export const mockCategories: Category[] = [
   { id: 5, name: "Книги", productCount: 20 }
 ];
 
-export const mockProducts: Product[] = [
-  { 
-    id: 1, 
-    name: "Светильник LED", 
-    items: 12, 
-    cards: 48, 
-    lastEdit: "2 часа назад",
-    status: "active",
-    category: "Дом и сад",
-    description: "Современный светильник с LED подсветкой для любого интерьера"
+export const mockStats = {
+  totalProducts: 1247,
+  activeProducts: 89,
+  totalCards: 156,
+  templates: 24,
+  views: 5200,
+  orders: 145,
+  ctr: 35,
+  cartAdditions: 12,
+  viewGrowth: 14,
+  timeSaved: 35
+};
+
+export const mockRecentCards = [
+  {
+    id: 1,
+    title: "Домик Чемодан",
+    image: "/img/cards/WB1.jpg",
+    date: "2024-09-25 11:00",
+    status: "active"
   },
-  { 
-    id: 2, 
-    name: "Ночник детский", 
-    items: 8, 
-    cards: 32, 
-    lastEdit: "1 день назад",
-    status: "active",
-    category: "Дом и сад",
-    description: "Мягкий ночник для детской комнаты с различными режимами"
+  {
+    id: 2,
+    title: "Увлекательная сборка",
+    image: "/img/cards/WB2.jpg",
+    date: "2024-09-25 11:00",
+    status: "active"
   },
-  { 
-    id: 3, 
-    name: "Люстра хрустальная", 
-    items: 5, 
-    cards: 20, 
-    lastEdit: "3 дня назад",
-    status: "draft",
-    category: "Дом и сад",
-    description: "Роскошная хрустальная люстра для гостиной"
+  {
+    id: 3,
+    title: "Что в наборе?",
+    image: "/img/cards/WB3.jpg",
+    date: "2024-09-25 11:00",
+    status: "active"
   },
-  { 
-    id: 4, 
-    name: "Торшер напольный", 
-    items: 7, 
-    cards: 28, 
-    lastEdit: "5 дней назад",
-    status: "active",
-    category: "Дом и сад",
-    description: "Стильный напольный торшер с регулируемой яркостью"
+  {
+    id: 4,
+    title: "2 куклы В ПОДАРОК",
+    image: "/img/cards/WB4.jpg",
+    date: "2024-09-25 11:00",
+    status: "active"
+  }
+];
+
+export const mockApiTasks = [
+  {
+    id: 1,
+    name: "Загрузка Карточек",
+    type: "Карточек",
+    date: "2024-09-25",
+    time: "11:00",
+    status: "Выполнено",
+    statusColor: "text-green-500"
   },
-  { 
-    id: 5, 
-    name: "Смартфон Galaxy", 
-    items: 15, 
-    cards: 60, 
-    lastEdit: "1 час назад",
-    status: "active",
-    category: "Электроника",
-    description: "Новейший смартфон с мощным процессором и отличной камерой"
+  {
+    id: 2,
+    name: "Аналитика Продаж",
+    type: "Продаж",
+    date: "2024-09-25",
+    time: "11:00",
+    status: "В очереди",
+    statusColor: "text-yellow-500"
   },
-  { 
-    id: 6, 
-    name: "Ноутбук Pro", 
-    items: 3, 
-    cards: 12, 
-    lastEdit: "2 дня назад",
-    status: "draft",
-    category: "Электроника",
-    description: "Профессиональный ноутбук для работы и творчества"
+  {
+    id: 3,
+    name: "Загрузка Товаров",
+    type: "Товаров",
+    date: "2024-09-25",
+    time: "11:00",
+    status: "Ошибка",
+    statusColor: "text-red-500"
+  },
+  {
+    id: 4,
+    name: "Аналитика Конверсий",
+    type: "Конверсий",
+    date: "2024-09-25",
+    time: "11:00",
+    status: "Выполнено",
+    statusColor: "text-green-500"
+  }
+];
+
+export const mockProducts = [
+  {
+    id: 1,
+    name: "Чемодомик",
+    category: "Игрушки",
+    items: "15 штук",
+    cards: "150 штук",
+    date: "2024-09-25 11:00",
+    notes: "Первые чемодомики",
+    status: "Активна",
+    statusColor: "bg-green-500",
+    image: "/img/cards/WB1.jpg"
+  },
+  {
+    id: 2,
+    name: "Чемодомик",
+    category: "Игрушки",
+    items: "15 штук",
+    cards: "150 штук",
+    date: "2024-09-25 11:00",
+    notes: "Первые чемодомики",
+    status: "Черновик",
+    statusColor: "bg-yellow-500",
+    image: "/img/cards/WB2.jpg"
+  },
+  {
+    id: 3,
+    name: "Чемодомик",
+    category: "Игрушки",
+    items: "15 штук",
+    cards: "150 штук",
+    date: "2024-09-25 11:00",
+    notes: "Первые чемодомики",
+    status: "Ожидание",
+    statusColor: "bg-blue-500",
+    image: "/img/cards/WB3.jpg"
+  }
+];
+
+export const mockQuickActions = [
+  {
+    id: 1,
+    title: "Создать карточку",
+    subtitle: "Начни с нуля",
+    action: "create"
+  },
+  {
+    id: 2,
+    title: "Используй шаблоны",
+    subtitle: "Быстрое результат",
+    action: "templates"
+  },
+  {
+    id: 3,
+    title: "Аналитика",
+    subtitle: "Тесты и метрики",
+    action: "analytics"
+  },
+  {
+    id: 4,
+    title: "Работа с API",
+    subtitle: "Автозагрузка",
+    action: "api"
   }
 ];
 
