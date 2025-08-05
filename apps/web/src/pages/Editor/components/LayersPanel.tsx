@@ -1,74 +1,59 @@
-import React, { useState, useMemo } from 'react';
-import type { Layer, GroupLayer } from '../types/editor.types';
+// Inspired by craft.js LayerManager: https://github.com/prevwong/craft.js/blob/master/examples/playground/components/Editor/LayerManager.js
+// and react-page CellTree: https://github.com/react-page/react-page/blob/main/packages/editor/src/ui/sidebar/CellTree.tsx
+
+import React, { useState } from 'react';
+import type { Node } from '../types/canvas.types';
 
 interface LayersPanelProps {
-  layers: Layer[];
-  selectedLayerId: string | null;
-  onSelectLayer: (layerId: string) => void;
-  onUpdateLayer: (layerId: string, updates: Partial<Layer>) => void;
-  onDeleteLayer: (layerId: string) => void;
-  onDuplicateLayer: (layerId: string) => void;
-  onCreateGroup: (layerIds: string[]) => void;
-  onUngroup: (groupId: string) => void;
+  nodes: Record<string, Node>;
+  selectedNodeId: string | null;
+  onNodeSelect: (nodeId: string | null) => void;
+  onNodeDelete: (nodeId: string) => void;
+  onNodeDuplicate: (nodeId: string) => void;
+  onNodeMove: (nodeId: string, targetParentId: string, index: number) => void;
+  onNodeVisibilityToggle: (nodeId: string) => void;
 }
 
 interface LayerItemProps {
-  layer: Layer;
+  node: Node;
+  nodes: Record<string, Node>;
+  level: number;
   isSelected: boolean;
-  isGrouped: boolean;
-  depth: number;
+  isVisible: boolean;
   onSelect: () => void;
-  onToggleVisibility: () => void;
-  onToggleLock: () => void;
-  onRename: (name: string) => void;
-  onDuplicate: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
+  onVisibilityToggle: () => void;
+  onDragStart: (e: React.DragEvent, nodeId: string) => void;
+  onDrop: (e: React.DragEvent, nodeId: string) => void;
+  onDragOver: (e: React.DragEvent) => void;
 }
 
 const LayerItem: React.FC<LayerItemProps> = ({
-  layer,
+  node,
+  level,
   isSelected,
-  isGrouped,
-  depth,
+  isVisible,
   onSelect,
-  onToggleVisibility,
-  onToggleLock,
-  onRename,
-  onDuplicate,
   onDelete,
+  onDuplicate,
+  onVisibilityToggle,
+  onDragStart,
+  onDrop,
+  onDragOver,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(layer.name);
+  const [isExpanded, setIsExpanded] = useState(true);
 
-  const handleDoubleClick = () => {
-    setIsEditing(true);
-    setEditName(layer.name);
-  };
-
-  const handleRename = () => {
-    if (editName.trim() && editName !== layer.name) {
-      onRename(editName.trim());
-    }
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleRename();
-    } else if (e.key === 'Escape') {
-      setIsEditing(false);
-      setEditName(layer.name);
-    }
-  };
-
-  const getLayerIcon = (type: string) => {
+  const getNodeIcon = (type: string) => {
     switch (type) {
       case 'text':
         return '📝';
       case 'image':
         return '🖼️';
-      case 'shape':
-        return '🔷';
+      case 'rectangle':
+        return '⬜';
+      case 'circle':
+        return '⭕';
       case 'group':
         return '📁';
       default:
@@ -76,295 +61,185 @@ const LayerItem: React.FC<LayerItemProps> = ({
     }
   };
 
+  const hasChildren = node.children && node.children.length > 0;
+
   return (
     <div
-      className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${
-        isSelected
-          ? 'bg-blue-50 border border-blue-200'
-          : 'hover:bg-gray-50 border border-transparent'
-      } ${isGrouped ? 'ml-4' : ''}`}
-      style={{ paddingLeft: `${12 + depth * 16}px` }}
-      onClick={onSelect}
+      className={`layer-item ${isSelected ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'}`}
+      draggable
+      onDragStart={onDragStart}
+      onDrop={onDrop}
+      onDragOver={onDragOver}
     >
-      {/* Иконка типа слоя */}
-      <span className="text-sm">{getLayerIcon(layer.type)}</span>
-
-      {/* Видимость */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleVisibility();
-        }}
-        className="p-1 hover:bg-gray-200 rounded transition-colors"
-        title={layer.visible ? 'Скрыть слой' : 'Показать слой'}
+      <div
+        className={`flex items-center px-3 py-2 border-l-4 ${
+          isSelected ? 'border-blue-500' : 'border-transparent'
+        }`}
+        style={{ paddingLeft: `${level * 16 + 12}px` }}
       >
-        {layer.visible ? '👁️' : '👁️‍🗨️'}
-      </button>
-
-      {/* Имя слоя */}
-      <div className="flex-1 min-w-0">
-        {isEditing ? (
-          <input
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            onBlur={handleRename}
-            onKeyDown={handleKeyDown}
-            className="w-full px-1 py-0.5 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-            autoFocus
-          />
-        ) : (
-          <div
-            className="text-sm font-medium truncate"
-            onDoubleClick={handleDoubleClick}
-            title={layer.name}
+        {/* Expand/Collapse button */}
+        {hasChildren && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-4 h-4 mr-2 flex items-center justify-center text-gray-500 hover:text-gray-700"
           >
-            {layer.name}
-          </div>
+            {isExpanded ? '▼' : '▶'}
+          </button>
         )}
-      </div>
-
-      {/* Блокировка */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleLock();
-        }}
-        className="p-1 hover:bg-gray-200 rounded transition-colors"
-        title={layer.locked ? 'Разблокировать слой' : 'Заблокировать слой'}
-      >
-        {layer.locked ? '🔒' : '🔓'}
-      </button>
-
-      {/* Действия */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        
+        {/* Visibility toggle */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDuplicate();
-          }}
-          className="p-1 hover:bg-gray-200 rounded transition-colors"
-          title="Дублировать (Ctrl+D)"
+          onClick={onVisibilityToggle}
+          className="w-4 h-4 mr-2 flex items-center justify-center text-gray-500 hover:text-gray-700"
         >
-          📋
+          {isVisible ? '👁️' : '👁️‍🗨️'}
+        </button>
+
+        {/* Node icon and name */}
+        <div className="flex items-center flex-1 min-w-0" onClick={onSelect}>
+          <span className="mr-2">{getNodeIcon(node.type)}</span>
+          <span className="text-sm font-medium truncate">
+            {node.displayName || node.type}
+          </span>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={onDuplicate}
+            className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
+            title="Дублировать"
+          >
+            📋
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="p-1 hover:bg-red-100 rounded transition-colors"
-          title="Удалить (Delete)"
+            onClick={onDelete}
+            className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"
+            title="Удалить"
         >
           🗑️
         </button>
       </div>
+      </div>
+
+      {/* Children */}
+      {hasChildren && isExpanded && (
+        <div className="children">
+          {node.children!.map((childId) => (
+            <LayerItem
+              key={childId}
+              node={nodes[childId]}
+              nodes={nodes}
+              level={level + 1}
+              isSelected={false} // TODO: implement selected state
+              isVisible={true} // TODO: implement visibility state
+              onSelect={() => {}} // TODO: implement select callback
+              onDelete={() => {}} // TODO: implement delete callback
+              onDuplicate={() => {}} // TODO: implement duplicate callback
+              onVisibilityToggle={() => {}} // TODO: implement visibility toggle
+              onDragStart={(e, nodeId) => onDragStart(e, nodeId)}
+              onDrop={(e, nodeId) => onDrop(e, nodeId)}
+              onDragOver={onDragOver}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-const LayersPanel: React.FC<LayersPanelProps> = ({
-  layers,
-  selectedLayerId,
-  onSelectLayer,
-  onUpdateLayer,
-  onDeleteLayer,
-  onDuplicateLayer,
-  onCreateGroup,
-  onUngroup,
+export const LayersPanel: React.FC<LayersPanelProps> = ({
+  nodes,
+  selectedNodeId,
+  onNodeSelect,
+  onNodeDelete,
+  onNodeDuplicate,
+  onNodeMove,
+  onNodeVisibilityToggle,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'text' | 'image' | 'shape' | 'group'>('all');
-  const [showHidden, setShowHidden] = useState(true);
+  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
 
-  // Фильтрация и поиск слоев
-  const filteredLayers = useMemo(() => {
-    return layers.filter(layer => {
-      // Поиск по имени
-      const matchesSearch = layer.name.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      // Фильтр по типу
-      const matchesType = filterType === 'all' || layer.type === filterType;
-      
-      // Фильтр по видимости
-      const matchesVisibility = showHidden || layer.visible;
-      
-      return matchesSearch && matchesType && matchesVisibility;
-    });
-  }, [layers, searchTerm, filterType, showHidden]);
+  // Получаем корневые узлы (без родителя)
+  const rootNodes = Object.values(nodes).filter(node => !node.parentId);
 
-  // Группировка слоев
-  const groupedLayers = useMemo(() => {
-    const groups: (Layer | GroupLayer)[] = [];
-    const processedIds = new Set<string>();
+  const handleDragStart = (e: React.DragEvent, nodeId: string) => {
+    setDraggedNodeId(nodeId);
+    e.dataTransfer.setData('text/plain', nodeId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
 
-    // Сначала добавляем группы
-    layers.forEach(layer => {
-      if (layer.type === 'group') {
-        groups.push(layer);
-        layer.children.forEach(id => processedIds.add(id));
-      }
-    });
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
 
-    // Затем добавляем негруппированные слои
-    layers.forEach(layer => {
-      if (!processedIds.has(layer.id) && layer.type !== 'group') {
-        groups.push(layer);
-      }
-    });
+  const handleDrop = (e: React.DragEvent, targetNodeId: string) => {
+    e.preventDefault();
+    
+    if (!draggedNodeId || draggedNodeId === targetNodeId) return;
 
-    return groups;
-  }, [layers]);
+    const targetNode = nodes[targetNodeId];
+    if (!targetNode) return;
 
-  const handleCreateGroup = () => {
-    if (selectedLayerId) {
-      // Создаем группу из выбранного слоя
-      onCreateGroup([selectedLayerId]);
+    // Определяем позицию вставки
+    let insertIndex = 0;
+    if (targetNode.children) {
+      insertIndex = targetNode.children.length;
     }
+
+    onNodeMove(draggedNodeId, targetNodeId, insertIndex);
+    setDraggedNodeId(null);
   };
 
-  const handleSelectAll = () => {
-    // TODO: Реализовать множественное выделение
-    console.log('Select all layers');
-  };
+  const handleDropOnRoot = (e: React.DragEvent) => {
+    e.preventDefault();
+    
+    if (!draggedNodeId) return;
 
-  const handleInvertSelection = () => {
-    // TODO: Реализовать инвертирование выделения
-    console.log('Invert selection');
+    // Перемещаем в корень
+    onNodeMove(draggedNodeId, '', 0);
+    setDraggedNodeId(null);
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Заголовок */}
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold mb-3">Слои</h2>
-        
-        {/* Поиск */}
-        <div className="mb-3">
-          <input
-            type="text"
-            placeholder="Поиск слоев..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+    <div className="layers-panel bg-white border-r border-gray-200 w-64 flex flex-col">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-900">Слои</h3>
         </div>
 
-        {/* Фильтры */}
-        <div className="flex gap-2 mb-3">
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
-            className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">Все типы</option>
-            <option value="text">Текст</option>
-            <option value="image">Изображения</option>
-            <option value="shape">Фигуры</option>
-            <option value="group">Группы</option>
-          </select>
-          
-          <button
-            onClick={() => setShowHidden(!showHidden)}
-            className={`px-2 py-1 text-sm rounded transition-colors ${
-              showHidden
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            title={showHidden ? 'Скрыть невидимые' : 'Показать все'}
-          >
-            👁️
-          </button>
-        </div>
-
-        {/* Действия */}
-        <div className="flex gap-1">
-          <button
-            onClick={handleCreateGroup}
-            className="flex-1 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            title="Создать группу (Ctrl+G)"
-          >
-            Группа
-          </button>
-          <button
-            onClick={handleSelectAll}
-            className="flex-1 px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-            title="Выбрать все (Ctrl+A)"
-          >
-            Все
-          </button>
-          <button
-            onClick={handleInvertSelection}
-            className="flex-1 px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-            title="Инвертировать выделение"
-          >
-            Инверт
-          </button>
+      {/* Layers list */}
+      <div className="flex-1 overflow-y-auto">
+        <div
+          className="min-h-full"
+          onDragOver={handleDragOver}
+          onDrop={handleDropOnRoot}
+        >
+          {rootNodes.map((node) => (
+            <LayerItem
+              key={node.id}
+              node={node}
+              level={0}
+              isSelected={selectedNodeId === node.id}
+              isVisible={true} // TODO: implement visibility state
+              onSelect={() => onNodeSelect(node.id)}
+              onDelete={() => onNodeDelete(node.id)}
+              onDuplicate={() => onNodeDuplicate(node.id)}
+              onVisibilityToggle={() => onNodeVisibilityToggle(node.id)}
+              onDragStart={(e) => handleDragStart(e, node.id)}
+              onDrop={(e) => handleDrop(e, node.id)}
+              onDragOver={handleDragOver}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Список слоев */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {filteredLayers.length === 0 ? (
-          <div className="text-center text-gray-500 text-sm py-8">
-            {searchTerm ? 'Слои не найдены' : 'Нет слоев'}
-          </div>
-        ) : (
-          filteredLayers.map((layer) => (
-            <div key={layer.id} className="group">
-              <LayerItem
-                layer={layer}
-                isSelected={selectedLayerId === layer.id}
-                isGrouped={layer.type === 'group'}
-                depth={0}
-                onSelect={() => onSelectLayer(layer.id)}
-                onToggleVisibility={() => onUpdateLayer(layer.id, { visible: !layer.visible })}
-                onToggleLock={() => onUpdateLayer(layer.id, { locked: !layer.locked })}
-                onRename={(name) => onUpdateLayer(layer.id, { name })}
-                onDuplicate={() => onDuplicateLayer(layer.id)}
-                onDelete={() => onDeleteLayer(layer.id)}
-              />
-              
-              {/* Дочерние слои для групп */}
-              {layer.type === 'group' && layer.children.length > 0 && (
-                <div className="ml-4">
-                  {layer.children.map(childId => {
-                    const childLayer = layers.find(l => l.id === childId);
-                    if (!childLayer) return null;
-                    
-                    return (
-                      <LayerItem
-                        key={childLayer.id}
-                        layer={childLayer}
-                        isSelected={selectedLayerId === childLayer.id}
-                        isGrouped={true}
-                        depth={1}
-                        onSelect={() => onSelectLayer(childLayer.id)}
-                        onToggleVisibility={() => onUpdateLayer(childLayer.id, { visible: !childLayer.visible })}
-                        onToggleLock={() => onUpdateLayer(childLayer.id, { locked: !childLayer.locked })}
-                        onRename={(name) => onUpdateLayer(childLayer.id, { name })}
-                        onDuplicate={() => onDuplicateLayer(childLayer.id)}
-                        onDelete={() => onDeleteLayer(childLayer.id)}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Статистика */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50">
-        <div className="text-xs text-gray-600">
-          Всего слоев: {layers.length} | 
-          Видимых: {layers.filter(l => l.visible).length} | 
-          Заблокированных: {layers.filter(l => l.locked).length}
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-gray-200">
+        <div className="text-xs text-gray-500">
+          {Object.keys(nodes).length} элементов
         </div>
       </div>
     </div>
   );
 };
-
-export default LayersPanel; 

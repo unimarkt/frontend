@@ -1,21 +1,141 @@
-// Базовые типы для редактора
-export interface Point {
-  x: number;
-  y: number;
+// Inspired by craft.js architecture: https://github.com/prevwong/craft.js
+// and react-page structure: https://github.com/react-page/react-page
+
+export interface Node {
+  id: string;
+  type: string;
+  props: Record<string, any>;
+  children?: Node[];
+  parentId?: string;
+  isCanvas?: boolean;
+  isResizable?: boolean;
+  isDeletable?: boolean;
+  displayName?: string;
+  custom?: Record<string, any>;
 }
 
-export interface Size {
-  width: number;
-  height: number;
+export interface EditorState {
+  nodes: Record<string, Node>;
+  selectedNodeId: string | null;
+  hoveredNodeId: string | null;
+  draggedNodeId: string | null;
+  history: EditorHistoryItem[];
+  historyIndex: number;
+  zoom: number;
+  showGrid: boolean;
+  isLoading: boolean;
+  error: string | null;
+  mode: 'edit' | 'preview';
+  canvasSize: { width: number; height: number };
 }
 
-// Типы слоев
-export type LayerType = 'text' | 'image' | 'shape' | 'group';
+export interface EditorHistoryItem {
+  id: string;
+  timestamp: number;
+  nodes: Record<string, Node>;
+  selectedNodeId: string | null;
+  description: string;
+}
 
-export interface BaseLayer {
+// Legacy history item for backward compatibility
+export interface LegacyEditorHistoryItem {
+  id: string;
+  timestamp: number;
+  layers: Layer[];
+  selectedLayerId: string | null;
+  description: string;
+}
+
+export interface ComponentConfig {
+  type: string;
+  displayName: string;
+  defaultProps: Record<string, any>;
+  isCanvas?: boolean;
+  isResizable?: boolean;
+  isDeletable?: boolean;
+  rules?: {
+    canMoveIn?: (incoming: Node[], self: Node) => boolean;
+    canMoveOut?: (outgoing: Node[], self: Node) => boolean;
+    canDelete?: (self: Node) => boolean;
+  };
+  related?: {
+    settings?: React.ComponentType<any>;
+  };
+}
+
+export interface EditorContextValue {
+  state: EditorState;
+  actions: EditorActions;
+  query: EditorQuery;
+  registry: ComponentRegistry;
+}
+
+export interface EditorActions {
+  // Node management
+  addNode: (node: Node, parentId?: string, index?: number) => void;
+  updateNode: (nodeId: string, updates: Partial<Node>) => void;
+  removeNode: (nodeId: string) => void;
+  duplicateNode: (nodeId: string) => void;
+  
+  // Selection
+  selectNode: (nodeId: string | null) => void;
+  hoverNode: (nodeId: string | null) => void;
+  
+  // Drag & Drop
+  setDraggedNode: (nodeId: string | null) => void;
+  moveNode: (nodeId: string, targetParentId: string, index: number) => void;
+  
+  // History
+  undo: () => void;
+  redo: () => void;
+  saveToHistory: (description: string) => void;
+  
+  // Canvas
+  setZoom: (zoom: number) => void;
+  setShowGrid: (show: boolean) => void;
+  setCanvasSize: (size: { width: number; height: number }) => void;
+  
+  // Mode
+  setMode: (mode: 'edit' | 'preview') => void;
+  
+  // Import/Export
+  importJSON: (json: string) => void;
+  exportJSON: () => string;
+  
+  // Registry
+  registerComponent: (config: ComponentConfig) => void;
+  unregisterComponent: (type: string) => void;
+}
+
+export interface EditorQuery {
+  getNode: (nodeId: string) => Node | null;
+  getNodes: () => Record<string, Node>;
+  getSelectedNode: () => Node | null;
+  getHoveredNode: () => Node | null;
+  getDraggedNode: () => Node | null;
+  getNodeAncestors: (nodeId: string) => Node[];
+  getNodeDescendants: (nodeId: string) => Node[];
+  getNodeSiblings: (nodeId: string) => Node[];
+  getNodeChildren: (nodeId: string) => Node[];
+  getNodeParent: (nodeId: string) => Node | null;
+  getNodeIndex: (nodeId: string) => number;
+  canMoveNode: (nodeId: string, targetParentId: string) => boolean;
+  canDeleteNode: (nodeId: string) => boolean;
+}
+
+export interface ComponentRegistry {
+  components: Record<string, ComponentConfig>;
+  register: (config: ComponentConfig) => void;
+  unregister: (type: string) => void;
+  get: (type: string) => ComponentConfig | null;
+  getAll: () => ComponentConfig[];
+}
+
+// Legacy types for backward compatibility
+export interface Layer {
   id: string;
   name: string;
-  type: LayerType;
+  type: 'text' | 'image' | 'shape' | 'group';
   x: number;
   y: number;
   width: number;
@@ -24,42 +144,30 @@ export interface BaseLayer {
   opacity: number;
   visible: boolean;
   locked: boolean;
-  zIndex: number;
-  fabricObject?: any; // Fabric.js объект
+  parentId?: string;
+  children?: string[];
+  props: Record<string, any>;
 }
 
-export interface TextLayer extends BaseLayer {
+export interface TextLayer extends Layer {
   type: 'text';
   text: string;
   fontSize: number;
   fontFamily: string;
-  fontWeight: string;
-  fontColor: string;
+  fontWeight: number;
+  color: string;
   textAlign: 'left' | 'center' | 'right';
   lineHeight: number;
-  letterSpacing: number;
-  textDecoration?: 'none' | 'underline' | 'line-through';
-  textShadow?: string;
-  textShadowX?: number;
-  textShadowY?: number;
-  textShadowBlur?: number;
-  textShadowColor?: string;
 }
 
-export interface ImageLayer extends BaseLayer {
+export interface ImageLayer extends Layer {
   type: 'image';
   src: string;
-  brightness: number;
-  contrast: number;
-  saturation: number;
-  blur: number;
-  filters: {
-    grayscale: boolean;
-    sepia: boolean;
-  };
+  alt: string;
+  objectFit: 'contain' | 'cover' | 'fill' | 'none';
 }
 
-export interface ShapeLayer extends BaseLayer {
+export interface ShapeLayer extends Layer {
   type: 'shape';
   shapeType: 'rectangle' | 'circle' | 'triangle';
   fillColor: string;
@@ -67,72 +175,15 @@ export interface ShapeLayer extends BaseLayer {
   strokeWidth: number;
 }
 
-export interface GroupLayer extends BaseLayer {
+export interface GroupLayer extends Layer {
   type: 'group';
-  children: string[]; // ID дочерних слоев
-}
-
-export type Layer = TextLayer | ImageLayer | ShapeLayer | GroupLayer;
-
-// Состояние редактора
-export interface EditorState {
-  layers: Layer[];
-  selectedLayerId: string | null;
-  zoom: number;
-  showGrid: boolean;
-  isLoading: boolean;
-  error: string | null;
-  history: EditorHistoryItem[];
-  historyIndex: number;
+  children: string[];
 }
 
 export interface EditorHistoryItem {
+  id: string;
+  timestamp: number;
   layers: Layer[];
-  timestamp: number;
-}
-
-// События редактора
-export interface EditorEvent {
-  type: 'layer-added' | 'layer-updated' | 'layer-deleted' | 'layer-selected' | 'canvas-cleared';
-  data?: any;
-}
-
-// Настройки экспорта
-export interface ExportSettings {
-  format: 'png' | 'jpg' | 'svg';
-  quality: number;
-  scale: number;
-  backgroundColor?: string;
-}
-
-// Настройки проекта
-export interface ProjectSettings {
-  name: string;
-  width: number;
-  height: number;
-  backgroundColor: string;
-  gridSize: number;
-  snapToGrid: boolean;
-}
-
-// Ошибки редактора
-export interface EditorError {
-  code: string;
-  message: string;
-  details?: any;
-  timestamp: number;
-}
-
-// Состояние загрузки
-export interface LoadingState {
-  isLoading: boolean;
-  message: string;
-  progress?: number;
-}
-
-// Валидация
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
+  selectedLayerId: string | null;
+  description: string;
 } 

@@ -1,166 +1,286 @@
+// Inspired by craft.js Toolbar: https://github.com/prevwong/craft.js/blob/master/examples/playground/components/Editor/Toolbar.js
+// and react-page Toolbar: https://github.com/react-page/react-page/blob/main/packages/editor/src/ui/toolbar/Toolbar.tsx
+
 import React from 'react';
+import type { Node } from '../types/canvas.types';
 
 interface ToolbarProps {
-  onAddText: () => void;
-  onAddImage: () => void;
-  onAddShape: () => void;
+  selectedNode: Node | null;
+  zoom: number;
+  showGrid: boolean;
+  onZoomChange: (zoom: number) => void;
+  onGridToggle: () => void;
   onUndo: () => void;
   onRedo: () => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+  onExport: (format?: string, options?: any) => void;
+  onImport: () => void;
   canUndo: boolean;
   canRedo: boolean;
-  showGrid: boolean;
-  onToggleGrid: () => void;
-  zoom: number;
-  onZoomChange: (zoom: number) => void;
+  canDelete: boolean;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({
-  onAddText,
-  onAddImage,
-  onAddShape,
+export const Toolbar: React.FC<ToolbarProps> = ({
+  selectedNode,
+  zoom,
+  showGrid,
+  onZoomChange,
+  onGridToggle,
   onUndo,
   onRedo,
+  onDelete,
+  onDuplicate,
+  onExport,
+  onImport,
   canUndo,
   canRedo,
-  showGrid,
-  onToggleGrid,
-  zoom,
-  onZoomChange
+  canDelete,
 }) => {
+  const zoomOptions = [25, 50, 75, 100, 125, 150, 200, 300, 400];
+
+  const handleZoomChange = (newZoom: number) => {
+    console.log('Zoom change:', newZoom);
+    onZoomChange(newZoom);
+  };
+
+  const handleGridToggle = () => {
+    console.log('Grid toggle clicked in Toolbar');
+    onGridToggle();
+  };
+
+  const handleUndo = () => {
+    console.log('Undo');
+    onUndo();
+  };
+
+  const handleRedo = () => {
+    console.log('Redo');
+    onRedo();
+  };
+
+  const handleDelete = () => {
+    console.log('Delete');
+    onDelete();
+  };
+
+  const handleDuplicate = () => {
+    console.log('Duplicate');
+    onDuplicate();
+  };
+
+  const handleExport = () => {
+    console.log('Export');
+    onExport();
+  };
+
+  const handleImport = () => {
+    console.log('Import');
+    onImport();
+  };
+
   return (
-    <div className="flex items-center justify-between">
-      {/* Левая группа - Инструменты */}
-      <div className="flex items-center gap-2">
-        {/* Шаблон */}
-        <div className="flex flex-col items-center gap-1 px-3 py-2">
-          <div className="w-6 h-6 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="7" height="7" stroke="#000000" strokeWidth="2" rx="1"/>
-              <rect x="14" y="3" width="7" height="7" stroke="#000000" strokeWidth="2" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" stroke="#000000" strokeWidth="2" rx="1"/>
-              <rect x="14" y="14" width="7" height="7" stroke="#000000" strokeWidth="2" rx="1"/>
-            </svg>
+    <div className="toolbar bg-white border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between">
+        {/* Левая часть - инструменты */}
+        <div className="flex items-center space-x-6">
+          {/* Инструменты вставки */}
+          <div className="flex items-center space-x-2">
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Вставить">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Макет">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Текст">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+            </button>
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Вектор">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+              </svg>
+            </button>
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="CMS">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </button>
           </div>
-          <span className="text-[12px] font-medium text-black">Шаблон</span>
+
+                     
+
+          {/* Элемент управления */}
+          {selectedNode && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <span>Выбран:</span>
+              <span className="font-medium text-gray-900">{selectedNode.displayName || selectedNode.type}</span>
+            </div>
+          )}
         </div>
 
-        {/* Текст */}
-        <div 
-          className="flex flex-col items-center gap-1 px-3 py-2 cursor-pointer hover:bg-[#F6F8FA] rounded transition-colors"
-          onClick={onAddText}
-        >
-          <div className="w-6 h-6 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M4 7V4H20V7M4 7V20M4 7H20M20 7V20" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+        {/* Центральная часть - название */}
+        <div className="flex-1 flex justify-center">
+          <h1 className="text-lg font-semibold text-gray-900">Конструктор карточек</h1>
+        </div>
+
+        {/* Правая часть - действия */}
+        <div className="flex items-center space-x-4">
+          {/* История */}
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={handleUndo}
+              disabled={!canUndo}
+              className={`p-2 rounded-md transition-colors ${
+                canUndo
+                  ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  : 'text-gray-400 cursor-not-allowed'
+              }`}
+              title="Отменить"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+              </svg>
+            </button>
+            <button
+              onClick={handleRedo}
+              disabled={!canRedo}
+              className={`p-2 rounded-md transition-colors ${
+                canRedo
+                  ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  : 'text-gray-400 cursor-not-allowed'
+              }`}
+              title="Повторить"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+              </svg>
+            </button>
           </div>
-          <span className="text-[12px] font-medium text-black">Текст</span>
-        </div>
 
-        {/* Картинка */}
-        <div 
-          className="flex flex-col items-center gap-1 px-3 py-2 cursor-pointer hover:bg-[#F6F8FA] rounded transition-colors"
-          onClick={onAddImage}
-        >
-          <div className="w-6 h-6 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="#000000" strokeWidth="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5" fill="#000000"/>
-              <path d="M21 15L16 10L5 21" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          {/* Масштаб */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleZoomChange(Math.max(25, zoom - 25))}
+              className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+              title="Уменьшить"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              </svg>
+            </button>
+            <select
+              value={zoom}
+              onChange={(e) => handleZoomChange(Number(e.target.value))}
+              className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {zoomOptions.map(option => (
+                <option key={option} value={option}>
+                  {option}%
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => handleZoomChange(Math.min(400, zoom + 25))}
+              className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+              title="Увеличить"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
           </div>
-          <span className="text-[12px] font-medium text-black">Картинка</span>
-        </div>
 
-        {/* Вектор */}
-        <div 
-          className="flex flex-col items-center gap-1 px-3 py-2 cursor-pointer hover:bg-[#F6F8FA] rounded transition-colors"
-          onClick={onAddShape}
-        >
-          <div className="w-6 h-6 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="#000000"/>
+          {/* Сетка */}
+          <button
+            onClick={handleGridToggle}
+            className={`p-2 rounded-md transition-colors ${
+              showGrid
+                ? 'text-blue-600 bg-blue-50'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+            title="Сетка"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
+          </button>
+
+          {/* Разделитель */}
+          <div className="w-px h-6 bg-gray-300"></div>
+
+          {/* Действия с элементами */}
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={handleDuplicate}
+              disabled={!selectedNode}
+              className={`p-2 rounded-md transition-colors ${
+                selectedNode
+                  ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  : 'text-gray-400 cursor-not-allowed'
+              }`}
+              title="Дублировать"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={!canDelete}
+              className={`p-2 rounded-md transition-colors ${
+                canDelete
+                  ? 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                  : 'text-gray-400 cursor-not-allowed'
+              }`}
+              title="Удалить"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
           </div>
-          <span className="text-[12px] font-medium text-black">Вектор</span>
+
+          {/* Разделитель */}
+          <div className="w-px h-6 bg-gray-300"></div>
+
+          {/* Импорт/Экспорт */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleImport}
+              className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+            >
+              Импорт
+            </button>
+            <button
+              onClick={handleExport}
+              className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+            >
+              Экспорт
+            </button>
+          </div>
+
+          {/* Дополнительные действия */}
+          <div className="flex items-center space-x-2">
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Пользователь">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors" title="Настройки">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Центральная группа - Навигация */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onUndo}
-          disabled={!canUndo}
-          className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
-            canUndo 
-              ? 'hover:bg-[#F6F8FA] text-[#6F6F6F]' 
-              : 'text-[#DFE1E7] cursor-not-allowed'
-          }`}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M3 7V11H7M21 17C21 13.6863 18.3137 11 15 11C11.6863 11 9 13.6863 9 17C9 20.3137 11.6863 23 15 23C18.3137 23 21 20.3137 21 17Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-
-        <button
-          onClick={onRedo}
-          disabled={!canRedo}
-          className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
-            canRedo 
-              ? 'hover:bg-[#F6F8FA] text-[#6F6F6F]' 
-              : 'text-[#DFE1E7] cursor-not-allowed'
-          }`}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M21 7V11H17M3 17C3 13.6863 5.68629 11 9 11C12.3137 11 15 13.6863 15 17C15 20.3137 12.3137 23 9 23C5.68629 23 3 20.3137 3 17Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      </div>
-
-      {/* Правая группа - Масштаб и сетка */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => onZoomChange(Math.max(25, zoom - 25))}
-          className="w-8 h-8 flex items-center justify-center hover:bg-[#F6F8FA] rounded transition-colors text-[#6F6F6F]"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-
-        <div className="w-16 text-center">
-          <span className="text-[14px] font-medium text-[#6F6F6F]">{zoom}%</span>
-        </div>
-
-        <button
-          onClick={() => onZoomChange(Math.min(400, zoom + 25))}
-          className="w-8 h-8 flex items-center justify-center hover:bg-[#F6F8FA] rounded transition-colors text-[#6F6F6F]"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-
-        <div className="w-px h-6 bg-[#DFE1E7] mx-2"></div>
-
-        <button
-          onClick={onToggleGrid}
-          className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
-            showGrid 
-              ? 'bg-[#EAF1FF] text-[#1264FF]' 
-              : 'hover:bg-[#F6F8FA] text-[#6F6F6F]'
-          }`}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M3 3H10V10H3V3Z" stroke="currentColor" strokeWidth="2"/>
-            <path d="M14 3H21V10H14V3Z" stroke="currentColor" strokeWidth="2"/>
-            <path d="M3 14H10V21H3V14Z" stroke="currentColor" strokeWidth="2"/>
-            <path d="M14 14H21V21H14V14Z" stroke="currentColor" strokeWidth="2"/>
-          </svg>
-        </button>
       </div>
     </div>
   );
-};
-
-export default Toolbar; 
+}; 
