@@ -11,8 +11,10 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.9",
     "@hookform/resolvers": "^5.2.0",
     "fabric": "^6.7.1",
+    "graphql": "^16.11.0",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",

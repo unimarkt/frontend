@@ -1,7 +1,10 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ApolloProvider } from '@apollo/client';
 import { Toaster } from 'react-hot-toast';
 import LoadingSpinner from './components/ui/LoadingSpinner';
+import { AuthProvider } from './contexts/AuthContext';
+import apolloClient from './utils/apollo';
 
 // Lazy loading для страниц
 const HomePage = React.lazy(() => import('./pages/Dashboard/HomePage'));
@@ -11,6 +14,8 @@ const ProductDetailPage = React.lazy(() => import('./pages/ProductDetail'));
 const EditorPage = React.lazy(() => import('./pages/Editor'));
 const ProductEditorPage = React.lazy(() => import('./pages/Products/ProductEditor'));
 const InDevelopment = React.lazy(() => import('./pages/InDevelopment'));
+const AuthPage = React.lazy(() => import('./pages/Auth'));
+const AuthDemo = React.lazy(() => import('./pages/Demo/AuthDemo'));
 
 // Компонент загрузки
 const PageLoader: React.FC = () => (
@@ -35,12 +40,22 @@ const NotFound: React.FC = () => (
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
+    <ApolloProvider client={apolloClient}>
+      <AuthProvider>
+        <BrowserRouter>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+          {/* Страницы аутентификации */}
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/register" element={<AuthPage />} />
+          
           {/* Главная страница */}
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
+          
+          {/* Демо страницы */}
+          <Route path="/demo/auth" element={<AuthDemo />} />
           
           {/* Страницы продуктов */}
           <Route path="/products" element={<ProductsPage />} />
@@ -119,18 +134,20 @@ export default function App() {
           
           {/* 404 страница */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-        }}
-      />
-    </BrowserRouter>
+          </Routes>
+        </Suspense>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+          }}
+        />
+        </BrowserRouter>
+      </AuthProvider>
+    </ApolloProvider>
   );
 }
